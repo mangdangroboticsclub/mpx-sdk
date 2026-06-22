@@ -1,0 +1,41 @@
+{
+	"name": "MPX-Dog Skill Development Kit",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"mounts": [
+		"source=mpx-skill-pip-cache,target=/root/.cache/pip,type=volume"
+	],
+	"containerEnv": {
+		"MPX_HOST": "192.168.2.1",
+		"MPX_PORT": "80",
+		"LC_ALL": "C.UTF-8",
+		"LANG": "C.UTF-8"
+	},
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"files.associations": {
+					"*.wat": "wat"
+				},
+				"[c]": {
+					"editor.defaultFormatter": "ms-vscode.cpptools"
+				},
+				"[wat]": {
+					"editor.defaultFormatter": "dtsvet.vscode-wasm"
+				}
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"tamasfe.even-better-toml",
+				"dtsvet.vscode-wasm",
+				"ms-vscode.cpptools-extension-pack"
+			]
+		}
+	},
+	"remoteUser": "root"
+}
