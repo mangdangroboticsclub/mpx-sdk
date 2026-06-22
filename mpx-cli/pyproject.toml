@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mpx-cli"
+version = "0.1.0"
+description = "MPX-Dog Skill Development Kit — build & deploy WASM skills"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache" }
+
+[project.scripts]
+mpx-cli = "mpx_cli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mpx_cli*"]
