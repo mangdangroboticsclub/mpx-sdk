@@ -1,0 +1,39 @@
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ── mpx-cli editable install ─────────────────────────────────────
+*.egg-link
+
+# ── WASM build outputs ───────────────────────────────────────────
+*.wasm
+examples/**/build/
+
+# ── Node / AssemblyScript ────────────────────────────────────────
+node_modules/
+
+# ── Environment ──────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── IDE / Editor ─────────────────────────────────────────────────
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
