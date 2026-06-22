@@ -133,45 +133,103 @@ export function on_start(): void {{
 }}
 """
 
-_readme_template = """\
+_readme_template_c = """\
 # {name} — MPX-Dog WASM Skill
 
 ## Prerequisites
 
-- **mpx-cli** — install with `pip install -e tools/`
-- **WASI SDK** (for C) — `/opt/wasi-sdk/bin/clang`
-- **WABT** (for WAT) — `/opt/wabt/bin/wat2wasm`
-- **AssemblyScript** (for TS) — `npm install -g assemblyscript`
+- **WASI SDK** — `/opt/wasi-sdk/bin/clang`
 
 ## Quick Start
 
 ```bash
-# Build
-mpx-cli build src/{name}.{ext}
-
-# Validate
-mpx-cli build src/{name}.{ext} --validate
-
-# Upload to robot (connected via WiFi)
+mpx-cli build src/{name}.c
+mpx-cli build src/{name}.c --validate
 mpx-cli upload src/{name}.wasm
-
-# Run on robot
 mpx-cli run {name}.wasm
 ```
 
 ## Host Functions
 
-All host functions are registered under the `"env"` module. For C skills,
-copy `mpx_host.h` from the mpx_cli SDK into your project:
+All host functions are registered under the `"env"` module.
+Declarations are provided in `include/mpx_host.h`:
 
-```bash
-cp <mpx_cli_path>/sdk/mpx_host.h include/
+```c
+#include "mpx_host.h"
 ```
 
-Then `#include "mpx_host.h"` in your source.
+See the header for the full list of available functions.
 
-See `docs/WASM_SANDBOX.md` in the MPX-Dog firmware repository for the
-full reference.
+## Safety
+
+- Linear memory: 128 KB max (PSRAM)
+- Execution timeout: 60 seconds
+- No direct hardware access — use host functions only
+"""
+
+_readme_template_wat = """\
+# {name} — MPX-Dog WASM Skill
+
+## Prerequisites
+
+- **WABT** — `/opt/wabt/bin/wat2wasm`
+
+## Quick Start
+
+```bash
+mpx-cli build src/{name}.wat
+mpx-cli build src/{name}.wat --validate
+mpx-cli upload src/{name}.wasm
+mpx-cli run {name}.wasm
+```
+
+## Host Functions
+
+All host functions are registered under the `"env"` module.
+Import them directly in your WAT source:
+
+```wat
+(import "env" "print" (func $print (param i32 i32)))
+(import "env" "robot_gait" (func $robot_gait (param i32)))
+(import "env" "robot_delay_ms" (func $robot_delay_ms (param i32)))
+```
+
+## Safety
+
+- Linear memory: 128 KB max (PSRAM)
+- Execution timeout: 60 seconds
+- No direct hardware access — use host functions only
+"""
+
+_readme_template_ts = """\
+# {name} — MPX-Dog WASM Skill
+
+## Prerequisites
+
+- **AssemblyScript** — `npm install -g assemblyscript`
+
+## Quick Start
+
+```bash
+mpx-cli build src/{name}.ts
+mpx-cli build src/{name}.ts --validate
+mpx-cli upload src/{name}.wasm
+mpx-cli run {name}.wasm
+```
+
+## Host Functions
+
+All host functions are registered under the `"env"` module.
+Declarations are provided in `include/mpx_env.ts`:
+
+```ts
+import {{
+    print, robot_gait, robot_delay_ms,
+    robot_set_config, robot_ping_servo,
+}} from "../include/mpx_env";
+```
+
+See the declaration file for the full list of available functions.
 
 ## Safety
 
@@ -242,7 +300,8 @@ def cmd_init(args: argparse.Namespace) -> None:
         _write(include_dir / "mpx_env.ts", MPX_ENV_TS_CONTENT)
 
     # Write README
-    _write(out_dir / "README.md", _readme_template.format(name=name, ext=ext))
+    readme_templates = {"c": _readme_template_c, "wat": _readme_template_wat, "ts": _readme_template_ts}
+    _write(out_dir / "README.md", readme_templates[lang].format(name=name))
 
     # Write Makefile
     makefile = (
