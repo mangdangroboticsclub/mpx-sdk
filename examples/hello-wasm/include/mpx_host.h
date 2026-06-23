@@ -221,9 +221,275 @@ extern int robot_ping_servo(int id);
 extern void robot_delay_ms(int ms);
 
 /* ═══════════════════════════════════════════════════════════════════
- *  Quick reference — all available functions:
+ *  PART 2 — High-Level Abstractions
  *
- *   void   MPX_print(const char *str, int len);
+ *  Enums, structs, and inline helpers that make skill development
+ *  easier.  They compile down to the Part 1 host functions — no
+ *  firmware changes needed.
+ *
+ *  Usage:
+ *      robot_stand();
+ *      robot_walk_forward(3000);
+ *      robot_turn_left(1500);
+ *      robot_jump();
+ *      robot_apply_pose((robot_pose_t){ .fr_shoulder = -30, ... });
+ *      MPX_print_int(42);
+ * ═══════════════════════════════════════════════════════════════════ */
+
+// ──── 1. Gait enum (no more string typos) ───────────────────
+
+typedef enum {
+    GAIT_NONE     = 0,
+    GAIT_INIT     = 1,
+    GAIT_STEP     = 2,
+    GAIT_ROLL     = 3,
+    GAIT_PITCH    = 4,
+    GAIT_STRETCH  = 5,
+    GAIT_ADVANCE  = 6,
+    GAIT_BACK     = 7,
+    GAIT_LEFT     = 8,
+    GAIT_RIGHT    = 9,
+    GAIT_TURN_L   = 10,
+    GAIT_TURN_R   = 11,
+    GAIT_TWERK    = 12,
+    GAIT_JUMP     = 13,
+    GAIT_JUMP_FWD = 14,
+    GAIT_TEST_SPD = 15,
+} robot_gait_t;
+
+/**
+ * @brief Start a gait using the type-safe enum.
+ *
+ * Internally maps enum → string → robot_gait().  No more
+ * typos like "advnce" silently failing.
+ */
+static inline void robot_gait_enum(robot_gait_t g) {
+    /* String lookup table in WASM linear memory.
+     * Must match the order of robot::GaitCmd on the firmware side. */
+    static const char *names[] = {
+        "none",     /* 0  GAIT_NONE     */
+        "init",     /* 1  GAIT_INIT     */
+        "step",     /* 2  GAIT_STEP     */
+        "roll",     /* 3  GAIT_ROLL     */
+        "pitch",    /* 4  GAIT_PITCH    */
+        "stretch",  /* 5  GAIT_STRETCH  */
+        "advance",  /* 6  GAIT_ADVANCE  */
+        "back",     /* 7  GAIT_BACK     */
+        "left",     /* 8  GAIT_LEFT     */
+        "right",    /* 9  GAIT_RIGHT    */
+        "turnL",    /* 10 GAIT_TURN_L   */
+        "turnR",    /* 11 GAIT_TURN_R   */
+        "twerk",    /* 12 GAIT_TWERK    */
+        "jump",     /* 13 GAIT_JUMP     */
+        "jumpfwd",  /* 14 GAIT_JUMP_FWD */
+        "testspeed",/* 15 GAIT_TEST_SPD */
+    };
+    if (g >= GAIT_NONE && g <= GAIT_TEST_SPD) {
+        robot_gait((int)names[(int)g]);
+    }
+}
+
+// ──── 2. Named servo IDs (no more magic numbers) ─────────────
+
+typedef enum {
+    /* Front Right leg */
+    SERVO_FR_HIP      = 1,
+    SERVO_FR_SHOULDER = 2,
+    SERVO_FR_KNEE     = 3,
+    /* Front Left leg */
+    SERVO_FL_HIP      = 4,
+    SERVO_FL_SHOULDER = 5,
+    SERVO_FL_KNEE     = 6,
+    /* Rear Right leg */
+    SERVO_RR_HIP      = 7,
+    SERVO_RR_SHOULDER = 8,
+    SERVO_RR_KNEE     = 9,
+    /* Rear Left leg */
+    SERVO_RL_HIP      = 10,
+    SERVO_RL_SHOULDER = 11,
+    SERVO_RL_KNEE     = 12,
+} robot_servo_t;
+
+// ──── 3. Degree-based servo control (no more centidegree math) ─
+
+/** Set servo angle in degrees (auto-converts to centidegrees). */
+static inline void robot_set_servo_deg(robot_servo_t id, float deg) {
+    robot_set_servo_angle((int)id, (int)(deg * 100.0f));
+}
+
+/** Set servo angle in raw 0-1023 units (maps 0°→0, 300°→1023). */
+static inline void robot_set_servo_raw(robot_servo_t id, int raw) {
+    robot_set_servo_angle((int)id, (raw * 30000) / 1023);
+}
+
+/** Set servo angle + speed in one call. */
+static inline void robot_set_servo(robot_servo_t id, float deg, int speed) {
+    robot_set_servo_speed((int)id, speed);
+    robot_set_servo_deg(id, deg);
+}
+
+// ──── 4. Config struct (no more flat 5-arg calls) ───────────
+
+typedef struct {
+    int period;      /**< Gait period in ms per phase */
+    int height;      /**< Body height in mm */
+    int up_height;   /**< Foot lift height in mm */
+    int stride;      /**< Stride length in mm */
+    int tilt;        /**< Max body tilt in degrees */
+} robot_config_t;
+
+/** Set config from a struct. */
+static inline void robot_set_config_ex(robot_config_t cfg) {
+    robot_set_config(cfg.period, cfg.height,
+                     cfg.up_height, cfg.stride, cfg.tilt);
+}
+
+/** Get current config as a struct. */
+static inline robot_config_t robot_get_config_ex(void) {
+    robot_config_t c;
+    c.period    = robot_get_period();
+    c.height    = robot_get_height();
+    c.up_height = robot_get_up_height();
+    c.stride    = robot_get_stride();
+    c.tilt      = robot_get_tilt();
+    return c;
+}
+
+// ──── 5. Choreography helpers (one-liner actions) ───────────
+
+/** Walk forward for N ms, then stop. */
+static inline void robot_walk_forward(int ms) {
+    robot_gait_enum(GAIT_ADVANCE);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Walk backward for N ms, then stop. */
+static inline void robot_walk_backward(int ms) {
+    robot_gait_enum(GAIT_BACK);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Turn left (spin) for N ms, then stop. */
+static inline void robot_turn_left(int ms) {
+    robot_gait_enum(GAIT_TURN_L);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Turn right (spin) for N ms, then stop. */
+static inline void robot_turn_right(int ms) {
+    robot_gait_enum(GAIT_TURN_R);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Strafe left for N ms, then stop. */
+static inline void robot_strafe_left(int ms) {
+    robot_gait_enum(GAIT_LEFT);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Strafe right for N ms, then stop. */
+static inline void robot_strafe_right(int ms) {
+    robot_gait_enum(GAIT_RIGHT);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Perform a single jump. */
+static inline void robot_jump(void) {
+    robot_gait_enum(GAIT_JUMP);
+    robot_delay_ms(2000);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Stand to init pose (blocks ~2 s). */
+static inline void robot_stand(void) {
+    robot_gait_enum(GAIT_INIT);
+    robot_delay_ms(2000);
+}
+
+/** Do a fun dance for N ms. */
+static inline void robot_dance(int ms) {
+    robot_set_config(60, 60, 15, 8, 15);
+    robot_gait_enum(GAIT_TWERK);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Step in place for N ms, then stop. */
+static inline void robot_step_in_place(int ms) {
+    robot_gait_enum(GAIT_STEP);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+// ──── 6. Full pose helper (all 12 servos at once) ───────────
+
+typedef struct {
+    float fr_hip, fr_shoulder, fr_knee;
+    float fl_hip, fl_shoulder, fl_knee;
+    float rr_hip, rr_shoulder, rr_knee;
+    float rl_hip, rl_shoulder, rl_knee;
+} robot_pose_t;
+
+/** Apply a complete pose — sets all 12 servos and flushes. */
+static inline void robot_apply_pose(robot_pose_t p) {
+    robot_set_servo_angle(SERVO_FR_HIP,      (int)(p.fr_hip      * 100.0f));
+    robot_set_servo_angle(SERVO_FR_SHOULDER,  (int)(p.fr_shoulder * 100.0f));
+    robot_set_servo_angle(SERVO_FR_KNEE,      (int)(p.fr_knee     * 100.0f));
+    robot_set_servo_angle(SERVO_FL_HIP,      (int)(p.fl_hip      * 100.0f));
+    robot_set_servo_angle(SERVO_FL_SHOULDER,  (int)(p.fl_shoulder * 100.0f));
+    robot_set_servo_angle(SERVO_FL_KNEE,      (int)(p.fl_knee     * 100.0f));
+    robot_set_servo_angle(SERVO_RR_HIP,      (int)(p.rr_hip      * 100.0f));
+    robot_set_servo_angle(SERVO_RR_SHOULDER,  (int)(p.rr_shoulder * 100.0f));
+    robot_set_servo_angle(SERVO_RR_KNEE,      (int)(p.rr_knee     * 100.0f));
+    robot_set_servo_angle(SERVO_RL_HIP,      (int)(p.rl_hip      * 100.0f));
+    robot_set_servo_angle(SERVO_RL_SHOULDER,  (int)(p.rl_shoulder * 100.0f));
+    robot_set_servo_angle(SERVO_RL_KNEE,      (int)(p.rl_knee     * 100.0f));
+    robot_flush();
+}
+
+// ──── 7. Integer printing (for debugging) ───────────────────
+
+/** Print an integer to the robot's log (handles negatives). */
+static inline void MPX_print_int(int value) {
+    char buf[16];
+    int  pos      = 15;
+    int  negative = 0;
+
+    buf[14] = '\n';
+    buf[15] = '\0';
+
+    if (value < 0) {
+        negative = 1;
+        value = -value;
+    }
+
+    if (value == 0) {
+        buf[--pos] = '0';
+    } else {
+        while (value > 0 && pos > 0) {
+            buf[--pos] = '0' + (value % 10);
+            value /= 10;
+        }
+    }
+
+    if (negative && pos > 0) {
+        buf[--pos] = '-';
+    }
+
+    print((int)(buf + pos), 15 - pos);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ *  Quick reference — all functions:
+ *
+ *  ── Raw imports (Part 1) ──────────────────────────
+ *   void   print(int ptr, int len);
  *   void   robot_gait(int name_ptr);
  *   int    robot_get_mode(void);
  *   void   robot_set_config(int period, int height,
@@ -241,7 +507,27 @@ extern void robot_delay_ms(int ms);
  *   int    robot_get_offset(int id);
  *   int    robot_ping_servo(int id);
  *   void   robot_delay_ms(int ms);
- * ═══════════════════════════════════════════════════════════════════ */
+ *
+ *  ── High-level (Part 2) ──────────────────────
+ *   void   robot_gait_enum(robot_gait_t g);
+ *   void   robot_set_servo_deg(robot_servo_t id, float deg);
+ *   void   robot_set_servo_raw(robot_servo_t id, int raw);
+ *   void   robot_set_servo(robot_servo_t id, float deg, int speed);
+ *   void   robot_set_config_ex(robot_config_t cfg);
+ *   robot_config_t robot_get_config_ex(void);
+ *   void   robot_walk_forward(int ms);
+ *   void   robot_walk_backward(int ms);
+ *   void   robot_turn_left(int ms);
+ *   void   robot_turn_right(int ms);
+ *   void   robot_strafe_left(int ms);
+ *   void   robot_strafe_right(int ms);
+ *   void   robot_jump(void);
+ *   void   robot_stand(void);
+ *   void   robot_dance(int ms);
+ *   void   robot_step_in_place(int ms);
+ *   void   robot_apply_pose(robot_pose_t p);
+ *   void   MPX_print_int(int value);
+ * ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 #ifdef __cplusplus
 }

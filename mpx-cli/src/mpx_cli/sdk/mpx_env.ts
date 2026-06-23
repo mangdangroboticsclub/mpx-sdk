@@ -59,3 +59,204 @@ export declare function robot_ping_servo(id: i32): i32;
 // ── Utility ─────────────────────────────────────────────────────
 @external("env", "robot_delay_ms")
 export declare function robot_delay_ms(ms: i32): void;
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  Part 2 — High-Level Abstractions
+// ═══════════════════════════════════════════════════════════════════
+
+// ──── 1. Gait enum ──────────────────────────────────────────────
+
+export const enum Gait {
+    NONE     = 0,
+    INIT     = 1,
+    STEP     = 2,
+    ROLL     = 3,
+    PITCH    = 4,
+    STRETCH  = 5,
+    ADVANCE  = 6,
+    BACK     = 7,
+    LEFT     = 8,
+    RIGHT    = 9,
+    TURN_L   = 10,
+    TURN_R   = 11,
+    TWERK    = 12,
+    JUMP     = 13,
+    JUMP_FWD = 14,
+    TEST_SPD = 15,
+}
+
+const GAIT_NAMES: StaticArray<u8[]> = [
+    [0x6e, 0x6f, 0x6e, 0x65],                               // "none"
+    [0x69, 0x6e, 0x69, 0x74],                               // "init"
+    [0x73, 0x74, 0x65, 0x70],                               // "step"
+    [0x72, 0x6f, 0x6c, 0x6c],                               // "roll"
+    [0x70, 0x69, 0x74, 0x63, 0x68],                         // "pitch"
+    [0x73, 0x74, 0x72, 0x65, 0x74, 0x63, 0x68],             // "stretch"
+    [0x61, 0x64, 0x76, 0x61, 0x6e, 0x63, 0x65],             // "advance"
+    [0x62, 0x61, 0x63, 0x6b],                               // "back"
+    [0x6c, 0x65, 0x66, 0x74],                               // "left"
+    [0x72, 0x69, 0x67, 0x68, 0x74],                         // "right"
+    [0x74, 0x75, 0x72, 0x6e, 0x4c],                         // "turnL"
+    [0x74, 0x75, 0x72, 0x6e, 0x52],                         // "turnR"
+    [0x74, 0x77, 0x65, 0x72, 0x6b],                         // "twerk"
+    [0x6a, 0x75, 0x6d, 0x70],                               // "jump"
+    [0x6a, 0x75, 0x6d, 0x70, 0x66, 0x77, 0x64],             // "jumpfwd"
+    [0x74, 0x65, 0x73, 0x74, 0x73, 0x70, 0x65, 0x65, 0x64], // "testspeed"
+];
+
+/** Start a gait using the type-safe enum. */
+export function robotGait(g: Gait): void {
+    const idx = g as i32;
+    if (idx < 0 || idx > 15) return;
+    const name = GAIT_NAMES[idx];
+    robot_gait(changetype<usize>(name));
+}
+
+// ──── 2. Named servo IDs ────────────────────────────────────────
+
+export const enum Servo {
+    FR_HIP      = 1,
+    FR_SHOULDER = 2,
+    FR_KNEE     = 3,
+    FL_HIP      = 4,
+    FL_SHOULDER = 5,
+    FL_KNEE     = 6,
+    RR_HIP      = 7,
+    RR_SHOULDER = 8,
+    RR_KNEE     = 9,
+    RL_HIP      = 10,
+    RL_SHOULDER = 11,
+    RL_KNEE     = 12,
+}
+
+// ──── 3. Degree-based servo control ─────────────────────────────
+
+/** Set servo angle in degrees (auto-converts to centidegrees). */
+export function setServoDeg(id: Servo, deg: f32): void {
+    robot_set_servo_angle(id as i32, (deg * 100.0) as i32);
+}
+
+/** Set servo angle + speed in one call. */
+export function setServo(id: Servo, deg: f32, speed: i32): void {
+    robot_set_servo_speed(id as i32, speed);
+    setServoDeg(id, deg);
+}
+
+// ──── 4. Config struct ─────────────────────────────────────────
+
+export class RobotConfig {
+    constructor(
+        public period: i32 = 80,
+        public height: i32 = 70,
+        public upHeight: i32 = 10,
+        public stride: i32 = 10,
+        public tilt: i32 = 10,
+    ) {}
+}
+
+/** Set config from a RobotConfig object. */
+export function setRobotConfig(cfg: RobotConfig): void {
+    robot_set_config(cfg.period, cfg.height, cfg.upHeight, cfg.stride, cfg.tilt);
+}
+
+/** Get current config as a RobotConfig object. */
+export function getRobotConfig(): RobotConfig {
+    return new RobotConfig(
+        robot_get_period(),
+        robot_get_height(),
+        robot_get_up_height(),
+        robot_get_stride(),
+        robot_get_tilt(),
+    );
+}
+
+// ──── 5. Choreography helpers ──────────────────────────────────
+
+export function walkForward(ms: i32): void {
+    robotGait(Gait.ADVANCE);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function walkBackward(ms: i32): void {
+    robotGait(Gait.BACK);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function turnLeft(ms: i32): void {
+    robotGait(Gait.TURN_L);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function turnRight(ms: i32): void {
+    robotGait(Gait.TURN_R);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function strafeLeft(ms: i32): void {
+    robotGait(Gait.LEFT);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function strafeRight(ms: i32): void {
+    robotGait(Gait.RIGHT);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function jump(): void {
+    robotGait(Gait.JUMP);
+    robot_delay_ms(2000);
+    robotGait(Gait.NONE);
+}
+
+export function stand(): void {
+    robotGait(Gait.INIT);
+    robot_delay_ms(2000);
+}
+
+export function dance(ms: i32): void {
+    robot_set_config(60, 60, 15, 8, 15);
+    robotGait(Gait.TWERK);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function stepInPlace(ms: i32): void {
+    robotGait(Gait.STEP);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+// ──── 6. Pose helper ───────────────────────────────────────────
+
+export class RobotPose {
+    constructor(
+        public frHip: f32 = 0, public frShoulder: f32 = 0, public frKnee: f32 = 0,
+        public flHip: f32 = 0, public flShoulder: f32 = 0, public flKnee: f32 = 0,
+        public rrHip: f32 = 0, public rrShoulder: f32 = 0, public rrKnee: f32 = 0,
+        public rlHip: f32 = 0, public rlShoulder: f32 = 0, public rlKnee: f32 = 0,
+    ) {}
+}
+
+/** Apply a complete pose — sets all 12 servos and flushes. */
+export function applyPose(p: RobotPose): void {
+    robot_set_servo_angle(Servo.FR_HIP,      (p.frHip      * 100.0) as i32);
+    robot_set_servo_angle(Servo.FR_SHOULDER,  (p.frShoulder * 100.0) as i32);
+    robot_set_servo_angle(Servo.FR_KNEE,      (p.frKnee     * 100.0) as i32);
+    robot_set_servo_angle(Servo.FL_HIP,      (p.flHip      * 100.0) as i32);
+    robot_set_servo_angle(Servo.FL_SHOULDER,  (p.flShoulder * 100.0) as i32);
+    robot_set_servo_angle(Servo.FL_KNEE,      (p.flKnee     * 100.0) as i32);
+    robot_set_servo_angle(Servo.RR_HIP,      (p.rrHip      * 100.0) as i32);
+    robot_set_servo_angle(Servo.RR_SHOULDER,  (p.rrShoulder * 100.0) as i32);
+    robot_set_servo_angle(Servo.RR_KNEE,      (p.rrKnee     * 100.0) as i32);
+    robot_set_servo_angle(Servo.RL_HIP,      (p.rlHip      * 100.0) as i32);
+    robot_set_servo_angle(Servo.RL_SHOULDER,  (p.rlShoulder * 100.0) as i32);
+    robot_set_servo_angle(Servo.RL_KNEE,      (p.rlKnee     * 100.0) as i32);
+    robot_flush();
+}
