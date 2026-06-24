@@ -1,0 +1,36 @@
+/* {name}.c — MPX-Dog WASM Skill
+ *
+ * Compile:
+ *   mpx-cli build {name}.c
+ *
+ * Upload & run:
+ *   mpx-cli upload {name}.wasm
+ *   mpx-cli run {name}.wasm
+ */
+
+#include <string.h>
+#include "mpx_host.h"
+
+/* Entry point called by the sandbox */
+void on_start(void)
+{{
+    const char *msg = "Hello from {name}!\n";
+    print((int)msg, (int)strlen(msg));
+
+    /* Ping servo 1 to verify the bus is alive */
+    int model = robot_ping_servo(1);
+    if (model > 0) {{
+        print((int)"Servo bus OK\n", 14);
+    }}
+
+    /* Set gait parameters: 100ms period, 70mm height, 10mm lift,
+     * 10mm stride, 10° tilt */
+    robot_set_config(100, 70, 10, 10, 10);
+
+    /* Walk forward for 2 seconds, then stop */
+    robot_gait((int)"advance");
+    robot_delay_ms(2000);
+    robot_gait((int)"none");
+
+    print((int)"Done\n", 5);
+}}

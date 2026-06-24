@@ -169,6 +169,72 @@ extern void robot_set_servo_speed(int id, int speed);
  */
 extern int robot_read_position(int id);
 
+/**
+ * @brief Read a servo's current speed.
+ *
+ * Wasm import:  extern int robot_read_speed(int id);
+ * WAMR sig:     "(i)i"
+ *
+ * @param  id  Servo ID (1-12)
+ * @return Signed speed value, or -1 on error
+ */
+extern int robot_read_speed(int id);
+
+/**
+ * @brief Read a servo's current load.
+ *
+ * Wasm import:  extern int robot_read_load(int id);
+ * WAMR sig:     "(i)i"
+ *
+ * @param  id  Servo ID (1-12)
+ * @return Signed load value, or -1 on error
+ */
+extern int robot_read_load(int id);
+
+/**
+ * @brief Read a servo's voltage.
+ *
+ * Wasm import:  extern int robot_read_voltage(int id);
+ * WAMR sig:     "(i)i"
+ *
+ * @param  id  Servo ID (1-12)
+ * @return Voltage in 0.1V units, or -1 on error
+ */
+extern int robot_read_voltage(int id);
+
+/**
+ * @brief Read a servo's temperature.
+ *
+ * Wasm import:  extern int robot_read_temperature(int id);
+ * WAMR sig:     "(i)i"
+ *
+ * @param  id  Servo ID (1-12)
+ * @return Temperature in °C, or -1 on error
+ */
+extern int robot_read_temperature(int id);
+
+/**
+ * @brief Read a servo's moving status.
+ *
+ * Wasm import:  extern int robot_read_moving(int id);
+ * WAMR sig:     "(i)i"
+ *
+ * @param  id  Servo ID (1-12)
+ * @return 0=stopped, 1=moving, or -1 on error
+ */
+extern int robot_read_moving(int id);
+
+/**
+ * @brief Read a servo's current draw.
+ *
+ * Wasm import:  extern int robot_read_current(int id);
+ * WAMR sig:     "(i)i"
+ *
+ * @param  id  Servo ID (1-12)
+ * @return Signed current in mA, or -1 on error
+ */
+extern int robot_read_current(int id);
+
 /* ── Calibration ─────────────────────────────────────────────── */
 
 /**
@@ -220,6 +286,70 @@ extern int robot_ping_servo(int id);
  */
 extern void robot_delay_ms(int ms);
 
+/* ── Inverse Kinematics (per-leg) ──────────────────────────────── */
+
+/**
+ * @brief Front-right leg IK target.
+ *
+ * Wasm import:  extern void robot_ik_fr(float x, float th0, float z);
+ * WAMR sig:     "(fff)"
+ *
+ * @param x    Forward/backward position in mm
+ * @param th0  Hip rotation angle in degrees
+ * @param z    Height in mm
+ */
+extern void robot_ik_fr(float x, float th0, float z);
+
+/**
+ * @brief Front-left leg IK target.
+ *
+ * Wasm import:  extern void robot_ik_fl(float x, float th0, float z);
+ * WAMR sig:     "(fff)"
+ */
+extern void robot_ik_fl(float x, float th0, float z);
+
+/**
+ * @brief Rear-right leg IK target.
+ *
+ * Wasm import:  extern void robot_ik_rr(float x, float th0, float z);
+ * WAMR sig:     "(fff)"
+ */
+extern void robot_ik_rr(float x, float th0, float z);
+
+/**
+ * @brief Rear-left leg IK target.
+ *
+ * Wasm import:  extern void robot_ik_rl(float x, float th0, float z);
+ * WAMR sig:     "(fff)"
+ */
+extern void robot_ik_rl(float x, float th0, float z);
+
+/* ── IMU ───────────────────────────────────────────────────────── */
+
+/**
+ * @brief Read IMU 6-DOF data into a WASM buffer.
+ *
+ * Wasm import:  extern void robot_imu_read(int buffer_ptr);
+ * WAMR sig:     "(i)"
+ *
+ * Buffer must be at least 6 × 4 = 24 bytes. Layout:
+ *   float[0] = ax (accel X, g)
+ *   float[1] = ay (accel Y, g)
+ *   float[2] = az (accel Z, g)
+ *   float[3] = gx (gyro X, dps)
+ *   float[4] = gy (gyro Y, dps)
+ *   float[5] = gz (gyro Z, dps)
+ */
+extern void robot_imu_read(int buffer_ptr);
+
+/**
+ * @brief Print the latest IMU data to the robot's log.
+ *
+ * Wasm import:  extern void robot_imu_print(void);
+ * WAMR sig:     "()"
+ */
+extern void robot_imu_print(void);
+
 /* ═══════════════════════════════════════════════════════════════════
  *  PART 2 — High-Level Abstractions
  *
@@ -236,7 +366,7 @@ extern void robot_delay_ms(int ms);
  *      MPX_print_int(42);
  * ═══════════════════════════════════════════════════════════════════ */
 
-// ──── 1. Gait enum (no more string typos) ───────────────────
+// ──── 1. Gait enum (no more string typos) ─────────────────────
 
 typedef enum {
     GAIT_NONE     = 0,
@@ -289,7 +419,7 @@ static inline void robot_gait_enum(robot_gait_t g) {
     }
 }
 
-// ──── 2. Named servo IDs (no more magic numbers) ─────────────
+// ──── 2. Named servo IDs (no more magic numbers) ──────────────
 
 typedef enum {
     /* Front Right leg */
@@ -328,7 +458,7 @@ static inline void robot_set_servo(robot_servo_t id, float deg, int speed) {
     robot_set_servo_deg(id, deg);
 }
 
-// ──── 4. Config struct (no more flat 5-arg calls) ───────────
+// ──── 4. Config struct (no more flat 5-arg calls) ────────────
 
 typedef struct {
     int period;      /**< Gait period in ms per phase */
@@ -355,7 +485,7 @@ static inline robot_config_t robot_get_config_ex(void) {
     return c;
 }
 
-// ──── 5. Choreography helpers (one-liner actions) ───────────
+// ──── 5. Choreography helpers (one-liner actions) ────────────
 
 /** Walk forward for N ms, then stop. */
 static inline void robot_walk_forward(int ms) {
@@ -427,7 +557,7 @@ static inline void robot_step_in_place(int ms) {
     robot_gait_enum(GAIT_NONE);
 }
 
-// ──── 6. Full pose helper (all 12 servos at once) ───────────
+// ──── 6. Full pose helper (all 12 servos at once) ────────────
 
 typedef struct {
     float fr_hip, fr_shoulder, fr_knee;
@@ -453,7 +583,7 @@ static inline void robot_apply_pose(robot_pose_t p) {
     robot_flush();
 }
 
-// ──── 7. Integer printing (for debugging) ───────────────────
+// ──── 7. Integer printing (for debugging) ─────────────────────
 
 /** Print an integer to the robot's log (handles negatives). */
 static inline void MPX_print_int(int value) {
@@ -485,10 +615,10 @@ static inline void MPX_print_int(int value) {
     print((int)(buf + pos), 15 - pos);
 }
 
-/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
  *  Quick reference — all functions:
  *
- *  ── Raw imports (Part 1) ──────────────────────────
+ *  ── Raw imports (Part 1) ──────────────────────────────────
  *   void   print(int ptr, int len);
  *   void   robot_gait(int name_ptr);
  *   int    robot_get_mode(void);
@@ -503,12 +633,24 @@ static inline void MPX_print_int(int value) {
  *   void   robot_flush(void);
  *   void   robot_set_servo_speed(int id, int speed);
  *   int    robot_read_position(int id);
+ *   int    robot_read_speed(int id);
+ *   int    robot_read_load(int id);
+ *   int    robot_read_voltage(int id);
+ *   int    robot_read_temperature(int id);
+ *   int    robot_read_moving(int id);
+ *   int    robot_read_current(int id);
  *   void   robot_set_offset(int id, int centideg);
  *   int    robot_get_offset(int id);
  *   int    robot_ping_servo(int id);
  *   void   robot_delay_ms(int ms);
+ *   void   robot_ik_fr(float x, float th0, float z);
+ *   void   robot_ik_fl(float x, float th0, float z);
+ *   void   robot_ik_rr(float x, float th0, float z);
+ *   void   robot_ik_rl(float x, float th0, float z);
+ *   void   robot_imu_read(int buffer_ptr);
+ *   void   robot_imu_print(void);
  *
- *  ── High-level (Part 2) ──────────────────────
+ *  ── High-level (Part 2) ───────────────────────────────────
  *   void   robot_gait_enum(robot_gait_t g);
  *   void   robot_set_servo_deg(robot_servo_t id, float deg);
  *   void   robot_set_servo_raw(robot_servo_t id, int raw);
@@ -527,7 +669,7 @@ static inline void MPX_print_int(int value) {
  *   void   robot_step_in_place(int ms);
  *   void   robot_apply_pose(robot_pose_t p);
  *   void   MPX_print_int(int value);
- * ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+ * ═══════════════════════════════════════════════════════════════════ */
 
 #ifdef __cplusplus
 }

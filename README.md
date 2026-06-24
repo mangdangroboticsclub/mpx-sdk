@@ -19,16 +19,19 @@ mpx-cli/                          # Python package (install via pip)
     │   ├── upload.py             # HTTP upload to robot
     │   ├── run.py                # Remote execution
     │   ├── list_skills.py        # List installed skills
-    │   └── delete.py             # Remove a skill
+    │   ├── delete.py             # Remove a skill
+    │   └── resource/             # Scaffolding templates & headers
+    │       ├── skill.c.template
+    │       ├── skill.wat.template
+    │       ├── skill.ts.template
+    │       ├── mpx_host.h
+    │       ├── mpx_env.ts
+    │       └── host_functions_wat.md
     └── sdk/
-    │   ├── connection.py         # Robot HTTP client (urllib only)
-    │   ├── toolchain.py          # Toolchain detection & compilation
-    │   ├── mpx_host.h            # C host function declarations
-    │   └── mpx_env.ts            # AssemblyScript host function declarations
-    └── templates/
-        ├── skill.c               # C skill template
-        ├── skill.wat             # WAT skill template
-        └── skill.ts              # AssemblyScript skill template
+        ├── connection.py         # Robot HTTP client (urllib only)
+        └── toolchain.py          # Toolchain detection & compilation
+
+HOST_FUNCTIONS.md                  # Language-agnostic host function reference
 
 examples/
 ├── hello-wasm/                   # Minimal C + WAT examples
@@ -182,16 +185,18 @@ _Note_: File size limit is subject to change
 
 ## Host Functions
 
-Skills communicate with the robot via host functions registered under the `"env"` module. Declared in [`mpx_host.h`](mpx-cli/src/mpx_cli/sdk/mpx_host.h) (C) and [`mpx_env.ts`](mpx-cli/src/mpx_cli/sdk/mpx_env.ts) (AssemblyScript).
+Skills communicate with the robot via host functions registered under the `"env"` module.
+See **[`HOST_FUNCTIONS.md`](HOST_FUNCTIONS.md)** for a complete, language-agnostic reference
+covering all low-level imports plus the high-level abstractions (gait enums, servo IDs,
+config structs, choreography helpers, IK, IMU).
 
-| Category | Functions |
-|----------|-----------|
-| Logging | `print(ptr, len)` |
-| Gaits | `robot_gait(name)` — `"advance"`, `"jump"`, `"turnL"`, `"turnR"`, `"step"`, `"back"`, `"left"`, `"right"`, `"init"`, `"none"`, `"roll"`, `"pitch"`, `"stretch"`, `"twerk"`, `"jumpfwd"` |
-| Config | `robot_set_config(period, height, up_height, stride, tilt)`, getters for each |
-| Servo | `robot_set_servo_angle(id, centideg)`, `robot_flush()`, `robot_set_servo_speed()`, `robot_read_position()` |
-| Calibration | `robot_set_offset()`, `robot_get_offset()`, `robot_ping_servo()` |
-| Utility | `robot_delay_ms(ms)` — only reliable way to pause (busy-loops run at near-zero wall time in the interpreter) |
+Language-specific declarations are in the SDK source tree:
+
+| Language | File |
+|----------|------|
+| C / C++ | [`mpx_host.h`](mpx-cli/src/mpx_cli/commands/resource/mpx_host.h) |
+| AssemblyScript | [`mpx_env.ts`](mpx-cli/src/mpx_cli/commands/resource/mpx_env.ts) |
+| WAT | [`host_functions_wat.md`](mpx-cli/src/mpx_cli/commands/resource/host_functions_wat.md) |
 
 ---
 

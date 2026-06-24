@@ -1,0 +1,31 @@
+# {name} — MPX-Dog WASM Skill
+
+## Prerequisites
+
+- **WABT** — `/opt/wabt/bin/wat2wasm`
+
+## Quick Start
+
+```bash
+mpx-cli build src/{name}.wat
+mpx-cli build src/{name}.wat --validate
+mpx-cli upload src/{name}.wasm
+mpx-cli run {name}.wasm
+```
+
+## Host Functions
+
+All host functions are registered under the `"env"` module.
+Import them directly in your WAT source:
+
+```wat
+(import "env" "print" (func $print (param i32 i32)))
+(import "env" "robot_gait" (func $robot_gait (param i32)))
+(import "env" "robot_delay_ms" (func $robot_delay_ms (param i32)))
+```
+
+## Safety
+
+- Linear memory: 128 KB max (PSRAM)
+- Execution timeout: 60 seconds
+- No direct hardware access — use host functions only

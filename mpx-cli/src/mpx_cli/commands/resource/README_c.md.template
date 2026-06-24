@@ -1,0 +1,31 @@
+# {name} — MPX-Dog WASM Skill
+
+## Prerequisites
+
+- **WASI SDK** — `/opt/wasi-sdk/bin/clang`
+
+## Quick Start
+
+```bash
+mpx-cli build src/{name}.c
+mpx-cli build src/{name}.c --validate
+mpx-cli upload src/{name}.wasm
+mpx-cli run {name}.wasm
+```
+
+## Host Functions
+
+All host functions are registered under the `"env"` module.
+Declarations are provided in `include/mpx_host.h`:
+
+```c
+#include "mpx_host.h"
+```
+
+See the header for the full list of available functions.
+
+## Safety
+
+- Linear memory: 128 KB max (PSRAM)
+- Execution timeout: 60 seconds
+- No direct hardware access — use host functions only

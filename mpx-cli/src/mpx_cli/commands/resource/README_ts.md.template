@@ -1,0 +1,34 @@
+# {name} — MPX-Dog WASM Skill
+
+## Prerequisites
+
+- **AssemblyScript** — `npm install -g assemblyscript`
+
+## Quick Start
+
+```bash
+mpx-cli build src/{name}.ts
+mpx-cli build src/{name}.ts --validate
+mpx-cli upload src/{name}.wasm
+mpx-cli run {name}.wasm
+```
+
+## Host Functions
+
+All host functions are registered under the `"env"` module.
+Declarations are provided in `include/mpx_env.ts`:
+
+```ts
+import {{
+    print, robot_gait, robot_delay_ms,
+    robot_set_config, robot_ping_servo,
+}} from "../include/mpx_env";
+```
+
+See the declaration file for the full list of available functions.
+
+## Safety
+
+- Linear memory: 128 KB max (PSRAM)
+- Execution timeout: 60 seconds
+- No direct hardware access — use host functions only

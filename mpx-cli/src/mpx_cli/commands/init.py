@@ -6,237 +6,23 @@ import argparse
 from pathlib import Path
 from mpx_cli.sdk.toolchain import detect_all
 
-# ── Template sources (embedded as Python strings) ───────────────
+# ── Resolve paths to resource files ──────────────────────────────
+_HERE = Path(__file__).resolve().parent
+_RES_DIR = _HERE / "resource"
 
-_skill_c = """\
-/* {name}.c — MPX-Dog WASM Skill
- *
- * Compile:
- *   mpx-cli build {name}.c
- *
- * Upload & run:
- *   mpx-cli upload {name}.wasm
- *   mpx-cli run {name}.wasm
- */
+# ── Template sources (loaded from resource/ files) ──────────────
 
-#include <string.h>
-#include "mpx_host.h"
+_skill_c = (_RES_DIR / "skill.c.template").read_text()
 
-/* Entry point called by the sandbox */
-void on_start(void)
-{{
-    const char *msg = "Hello from {name}!\\n";
-    print((int)msg, (int)strlen(msg));
+_skill_wat = (_RES_DIR / "skill.wat.template").read_text()
 
-    /* Ping servo 1 to verify the bus is alive */
-    int model = robot_ping_servo(1);
-    if (model > 0) {{
-        print((int)"Servo bus OK\\n", 14);
-    }}
+_skill_ts = (_RES_DIR / "skill.ts.template").read_text()
 
-    /* Set gait parameters: 100ms period, 70mm height, 10mm lift,
-     * 10mm stride, 10° tilt */
-    robot_set_config(100, 70, 10, 10, 10);
+_readme_template_c = (_RES_DIR / "README_c.md.template").read_text()
+_readme_template_wat = (_RES_DIR / "README_wat.md.template").read_text()
+_readme_template_ts = (_RES_DIR / "README_ts.md.template").read_text()
 
-    /* Walk forward for 2 seconds, then stop */
-    robot_gait((int)"advance");
-    robot_delay_ms(2000);
-    robot_gait((int)"none");
-
-    print((int)"Done\\n", 5);
-}}
-"""
-
-_skill_wat = """\
-;; {name}.wat — MPX-Dog WASM Skill
-;;
-;; Compile:
-;;   mpx-cli build {name}.wat
-;;
-;; Upload & run:
-;;   mpx-cli upload {name}.wasm
-;;   mpx-cli run {name}.wasm
-;;
-;; Imports below match the host functions registered in the
-;; ESP32 firmware under the "env" module.
-
-(module
-    ;; Import host functions from the "env" module
-    (import "env" "print" (func $print (param i32 i32)))
-    (import "env" "robot_gait" (func $robot_gait (param i32)))
-    (import "env" "robot_delay_ms" (func $robot_delay_ms (param i32)))
-
-    ;; Export linear memory (1 page = 64 KB)
-    (memory (export "memory") 1)
-
-    ;; Strings at fixed offsets
-    (data (i32.const 0) "Hello from {name}!")
-    (data (i32.const 64) "advance")
-    (data (i32.const 128) "none")
-
-    ;; Entry point — called by the sandbox as "on_start"
-    (func (export "on_start")
-        ;; Print greeting
-        i32.const 0
-        i32.const 18
-        call $print
-
-        ;; Start advancing gait
-        i32.const 64
-        call $robot_gait
-
-        ;; Walk for 2 seconds
-        i32.const 2000
-        call $robot_delay_ms
-
-        ;; Stop
-        i32.const 128
-        call $robot_gait
-    )
-)
-"""
-
-_skill_ts = """\
-// {name}.ts — MPX-Dog WASM Skill (AssemblyScript)
-//
-// Compile:
-//   mpx-cli build {name}.ts
-//
-// Upload & run:
-//   mpx-cli upload {name}.wasm
-//   mpx-cli run {name}.wasm
-
-import {{
-    print, robot_gait, robot_delay_ms,
-    robot_set_config, robot_ping_servo,
-}} from "../include/mpx_env";
-
-export function on_start(): void {{
-    const msg = "Hello from {name}!\\n";
-    const encoded = String.UTF8.encode(msg);
-    print(changetype<usize>(encoded), encoded.byteLength as i32);
-
-    const model = robot_ping_servo(1);
-    if (model > 0) {{
-        const ok = String.UTF8.encode("Servo bus OK\\n");
-        print(changetype<usize>(ok), ok.byteLength as i32);
-    }}
-
-    robot_set_config(100, 70, 10, 10, 10);
-
-    const advance = String.UTF8.encode("advance");
-    robot_gait(changetype<usize>(advance));
-    robot_delay_ms(2000);
-
-    const stop = String.UTF8.encode("none");
-    robot_gait(changetype<usize>(stop));
-}}
-"""
-
-_readme_template_c = """\
-# {name} — MPX-Dog WASM Skill
-
-## Prerequisites
-
-- **WASI SDK** — `/opt/wasi-sdk/bin/clang`
-
-## Quick Start
-
-```bash
-mpx-cli build src/{name}.c
-mpx-cli build src/{name}.c --validate
-mpx-cli upload src/{name}.wasm
-mpx-cli run {name}.wasm
-```
-
-## Host Functions
-
-All host functions are registered under the `"env"` module.
-Declarations are provided in `include/mpx_host.h`:
-
-```c
-#include "mpx_host.h"
-```
-
-See the header for the full list of available functions.
-
-## Safety
-
-- Linear memory: 128 KB max (PSRAM)
-- Execution timeout: 60 seconds
-- No direct hardware access — use host functions only
-"""
-
-_readme_template_wat = """\
-# {name} — MPX-Dog WASM Skill
-
-## Prerequisites
-
-- **WABT** — `/opt/wabt/bin/wat2wasm`
-
-## Quick Start
-
-```bash
-mpx-cli build src/{name}.wat
-mpx-cli build src/{name}.wat --validate
-mpx-cli upload src/{name}.wasm
-mpx-cli run {name}.wasm
-```
-
-## Host Functions
-
-All host functions are registered under the `"env"` module.
-Import them directly in your WAT source:
-
-```wat
-(import "env" "print" (func $print (param i32 i32)))
-(import "env" "robot_gait" (func $robot_gait (param i32)))
-(import "env" "robot_delay_ms" (func $robot_delay_ms (param i32)))
-```
-
-## Safety
-
-- Linear memory: 128 KB max (PSRAM)
-- Execution timeout: 60 seconds
-- No direct hardware access — use host functions only
-"""
-
-_readme_template_ts = """\
-# {name} — MPX-Dog WASM Skill
-
-## Prerequisites
-
-- **AssemblyScript** — `npm install -g assemblyscript`
-
-## Quick Start
-
-```bash
-mpx-cli build src/{name}.ts
-mpx-cli build src/{name}.ts --validate
-mpx-cli upload src/{name}.wasm
-mpx-cli run {name}.wasm
-```
-
-## Host Functions
-
-All host functions are registered under the `"env"` module.
-Declarations are provided in `include/mpx_env.ts`:
-
-```ts
-import {{
-    print, robot_gait, robot_delay_ms,
-    robot_set_config, robot_ping_servo,
-}} from "../include/mpx_env";
-```
-
-See the declaration file for the full list of available functions.
-
-## Safety
-
-- Linear memory: 128 KB max (PSRAM)
-- Execution timeout: 60 seconds
-- No direct hardware access — use host functions only
-"""
+_host_functions_wat = (_RES_DIR / "host_functions_wat.md").read_text()
 
 
 def _write(path: Path, content: str) -> None:
@@ -298,6 +84,10 @@ def cmd_init(args: argparse.Namespace) -> None:
         include_dir = out_dir / "include"
         include_dir.mkdir(parents=True, exist_ok=True)
         _write(include_dir / "mpx_env.ts", MPX_ENV_TS_CONTENT)
+    elif lang == "wat":
+        include_dir = out_dir / "include"
+        include_dir.mkdir(parents=True, exist_ok=True)
+        _write(include_dir / "host_functions.md", _host_functions_wat)
 
     # Write README
     readme_templates = {"c": _readme_template_c, "wat": _readme_template_wat, "ts": _readme_template_ts}
@@ -337,110 +127,7 @@ def cmd_init(args: argparse.Namespace) -> None:
     print(f"✅ Project '{name}' initialized! See {out_dir / 'README.md'} to get started.")
 
 
-# ── Embedded mpx_host.h content ──────────────────────────────────
+# ── Header content (loaded from resource/ files) ──────────────────
 
-MPX_HOST_H_CONTENT = """\
-/* mpx_host.h — MPX-Dog WASM Skill Host Function Reference
- *
- * All functions are registered under the "env" module by the
- * ESP32 firmware. Include this header in your C/C++ skills.
- */
-
-#ifndef MPX_HOST_H
-#define MPX_HOST_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* ── SDK / Logging ───────────────────────────────────────────── */
-extern void print(int ptr, int len);
-static inline void MPX_print(const char *str, int len) { print((int)str, len); }
-#define MPX_LOG(msg)  MPX_print((msg), (int)(sizeof(msg) - 1))
-
-/* ── High-Level Gait Control ─────────────────────────────────── */
-extern void robot_gait(int name_ptr);
-extern int  robot_get_mode(void);
-
-/* ── Configuration ───────────────────────────────────────────── */
-extern void robot_set_config(int period, int height,
-                             int up_height, int stride, int tilt);
-extern int  robot_get_period(void);
-extern int  robot_get_height(void);
-extern int  robot_get_up_height(void);
-extern int  robot_get_stride(void);
-extern int  robot_get_tilt(void);
-
-/* ── Low-Level Servo Control ─────────────────────────────────── */
-extern void robot_set_servo_angle(int id, int centideg);
-extern void robot_flush(void);
-extern void robot_set_servo_speed(int id, int speed);
-extern int  robot_read_position(int id);
-
-/* ── Calibration ─────────────────────────────────────────────── */
-extern void robot_set_offset(int id, int centideg);
-extern int  robot_get_offset(int id);
-extern int  robot_ping_servo(int id);
-
-/* ── Utility ─────────────────────────────────────────────────── */
-extern void robot_delay_ms(int ms);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* MPX_HOST_H */
-"""
-
-# ── Embedded mpx_env.ts content ─────────────────────────────────
-
-MPX_ENV_TS_CONTENT = """\
-/**
- * mpx_env.ts — MPX-Dog WASM Host Function Declarations (AssemblyScript)
- *
- * Import host functions into your skill:
- *
- *   import {
- *     print, robot_gait, robot_delay_ms,
- *     robot_set_config, robot_ping_servo,
- *   } from "../include/mpx_env";
- */
-
-@external("env", "print")
-export declare function print(ptr: usize, len: i32): void;
-@external("env", "robot_gait")
-export declare function robot_gait(name_ptr: usize): void;
-@external("env", "robot_get_mode")
-export declare function robot_get_mode(): i32;
-@external("env", "robot_set_config")
-export declare function robot_set_config(
-    period: i32, height: i32,
-    up_height: i32, stride: i32, tilt: i32,
-): void;
-@external("env", "robot_get_period")
-export declare function robot_get_period(): i32;
-@external("env", "robot_get_height")
-export declare function robot_get_height(): i32;
-@external("env", "robot_get_up_height")
-export declare function robot_get_up_height(): i32;
-@external("env", "robot_get_stride")
-export declare function robot_get_stride(): i32;
-@external("env", "robot_get_tilt")
-export declare function robot_get_tilt(): i32;
-@external("env", "robot_set_servo_angle")
-export declare function robot_set_servo_angle(id: i32, centideg: i32): void;
-@external("env", "robot_flush")
-export declare function robot_flush(): void;
-@external("env", "robot_set_servo_speed")
-export declare function robot_set_servo_speed(id: i32, speed: i32): void;
-@external("env", "robot_read_position")
-export declare function robot_read_position(id: i32): i32;
-@external("env", "robot_set_offset")
-export declare function robot_set_offset(id: i32, centideg: i32): void;
-@external("env", "robot_get_offset")
-export declare function robot_get_offset(id: i32): i32;
-@external("env", "robot_ping_servo")
-export declare function robot_ping_servo(id: i32): i32;
-@external("env", "robot_delay_ms")
-export declare function robot_delay_ms(ms: i32): void;
-"""
+MPX_HOST_H_CONTENT = (_RES_DIR / "mpx_host.h").read_text()
+MPX_ENV_TS_CONTENT = (_RES_DIR / "mpx_env.ts").read_text()

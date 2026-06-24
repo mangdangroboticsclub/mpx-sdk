@@ -48,6 +48,20 @@ export declare function robot_set_servo_speed(id: i32, speed: i32): void;
 @external("env", "robot_read_position")
 export declare function robot_read_position(id: i32): i32;
 
+// ── Additional Servo Read Functions ──────────────────────────────
+@external("env", "robot_read_speed")
+export declare function robot_read_speed(id: i32): i32;
+@external("env", "robot_read_load")
+export declare function robot_read_load(id: i32): i32;
+@external("env", "robot_read_voltage")
+export declare function robot_read_voltage(id: i32): i32;
+@external("env", "robot_read_temperature")
+export declare function robot_read_temperature(id: i32): i32;
+@external("env", "robot_read_moving")
+export declare function robot_read_moving(id: i32): i32;
+@external("env", "robot_read_current")
+export declare function robot_read_current(id: i32): i32;
+
 // ── Calibration ─────────────────────────────────────────────────
 @external("env", "robot_set_offset")
 export declare function robot_set_offset(id: i32, centideg: i32): void;
@@ -59,6 +73,22 @@ export declare function robot_ping_servo(id: i32): i32;
 // ── Utility ─────────────────────────────────────────────────────
 @external("env", "robot_delay_ms")
 export declare function robot_delay_ms(ms: i32): void;
+
+// ── Inverse Kinematics (per-leg) ─────────────────────────────────
+@external("env", "robot_ik_fr")
+export declare function robot_ik_fr(x: f32, th0: f32, z: f32): void;
+@external("env", "robot_ik_fl")
+export declare function robot_ik_fl(x: f32, th0: f32, z: f32): void;
+@external("env", "robot_ik_rr")
+export declare function robot_ik_rr(x: f32, th0: f32, z: f32): void;
+@external("env", "robot_ik_rl")
+export declare function robot_ik_rl(x: f32, th0: f32, z: f32): void;
+
+// ── IMU ──────────────────────────────────────────────────────────
+@external("env", "robot_imu_read")
+export declare function robot_imu_read(buffer_ptr: usize): void;
+@external("env", "robot_imu_print")
+export declare function robot_imu_print(): void;
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -259,4 +289,52 @@ export function applyPose(p: RobotPose): void {
     robot_set_servo_angle(Servo.RL_SHOULDER,  (p.rlShoulder * 100.0) as i32);
     robot_set_servo_angle(Servo.RL_KNEE,      (p.rlKnee     * 100.0) as i32);
     robot_flush();
+}
+
+// ──── 7. IK helper ──────────────────────────────────────────────
+
+/** Per-leg IK target. */
+export class ikTarget {
+    constructor(
+        public x: f32 = 0,   /**< Forward/backward position in mm */
+        public th0: f32 = 0, /**< Hip rotation in degrees */
+        public z: f32 = 0,   /**< Height in mm */
+    ) {}
+}
+
+/** Set front-right leg IK from an ikTarget. */
+export function ikFR(t: ikTarget): void {
+    robot_ik_fr(t.x, t.th0, t.z);
+}
+/** Set front-left leg IK from an ikTarget. */
+export function ikFL(t: ikTarget): void {
+    robot_ik_fl(t.x, t.th0, t.z);
+}
+/** Set rear-right leg IK from an ikTarget. */
+export function ikRR(t: ikTarget): void {
+    robot_ik_rr(t.x, t.th0, t.z);
+}
+/** Set rear-left leg IK from an ikTarget. */
+export function ikRL(t: ikTarget): void {
+    robot_ik_rl(t.x, t.th0, t.z);
+}
+
+// ──── 8. IMU data ───────────────────────────────────────────────
+
+export class ImuData {
+    constructor(
+        public ax: f32 = 0, /**< Accel X (g) */
+        public ay: f32 = 0, /**< Accel Y (g) */
+        public az: f32 = 0, /**< Accel Z (g) */
+        public gx: f32 = 0, /**< Gyro X (dps) */
+        public gy: f32 = 0, /**< Gyro Y (dps) */
+        public gz: f32 = 0, /**< Gyro Z (dps) */
+    ) {}
+}
+
+/** Read IMU data into an ImuData object. */
+export function readImu(): ImuData {
+    const buf = new Float32Array(6);
+    robot_imu_read(changetype<usize>(buf));
+    return new ImuData(buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
 }
