@@ -43,6 +43,28 @@ WAMR signature (the type string the firmware uses to register it), and a descrip
 | `"jump"` | Jump |
 | `"jumpfwd"` | Jump forward |
 | `"testspeed"` | Speed test |
+| `"lookup"` | Look up (gait-based) |
+| `"lookdown"` | Look down (gait-based) |
+| `"lookleft"` | Look left (gait-based) |
+| `"lookright"` | Look right (gait-based) |
+| `"lookul"` | Look upper-left |
+| `"lookur"` | Look upper-right |
+| `"lookll"` | Look lower-left |
+| `"looklr"` | Look lower-right |
+| `"flegL"` | Foreleg lift left |
+| `"flegR"` | Foreleg lift right |
+| `"blegL"` | Backleg lift left |
+| `"blegR"` | Backleg lift right |
+| `"heightup"` | Height up |
+| `"heightdown"` | Height down |
+| `"balance"` | Balance body |
+| `"bowback"` | Bow backward |
+| `"bodycycle"` | Cycle body motion |
+| `"headellipse"` | Head ellipse motion |
+| `"moveLF"` | Move left front leg |
+| `"moveRF"` | Move right front leg |
+| `"moveLB"` | Move left back leg |
+| `"moveRB"` | Move right back leg |
 
 ### Configuration
 
@@ -177,6 +199,28 @@ A type-safe enum replaces raw string names:
 | `GAIT_JUMP` / `Gait.JUMP` | 13 | `"jump"` |
 | `GAIT_JUMP_FWD` / `Gait.JUMP_FWD` | 14 | `"jumpfwd"` |
 | `GAIT_TEST_SPD` / `Gait.TEST_SPD` | 15 | `"testspeed"` |
+| `GAIT_LOOK_UP` / `Gait.LOOK_UP` | 16 | `"lookup"` |
+| `GAIT_LOOK_DOWN` / `Gait.LOOK_DOWN` | 17 | `"lookdown"` |
+| `GAIT_LOOK_LEFT` / `Gait.LOOK_LEFT` | 18 | `"lookleft"` |
+| `GAIT_LOOK_RIGHT` / `Gait.LOOK_RIGHT` | 19 | `"lookright"` |
+| `GAIT_LOOK_UL` / `Gait.LOOK_UL` | 20 | `"lookul"` |
+| `GAIT_LOOK_UR` / `Gait.LOOK_UR` | 21 | `"lookur"` |
+| `GAIT_LOOK_LL` / `Gait.LOOK_LL` | 22 | `"lookll"` |
+| `GAIT_LOOK_LR` / `Gait.LOOK_LR` | 23 | `"looklr"` |
+| `GAIT_FORELEG_LIFT_L` / `Gait.FORELEG_LIFT_L` | 24 | `"flegL"` |
+| `GAIT_FORELEG_LIFT_R` / `Gait.FORELEG_LIFT_R` | 25 | `"flegR"` |
+| `GAIT_BACKLEG_LIFT_L` / `Gait.BACKLEG_LIFT_L` | 26 | `"blegL"` |
+| `GAIT_BACKLEG_LIFT_R` / `Gait.BACKLEG_LIFT_R` | 27 | `"blegR"` |
+| `GAIT_HEIGHT_UP` / `Gait.HEIGHT_UP` | 28 | `"heightup"` |
+| `GAIT_HEIGHT_DOWN` / `Gait.HEIGHT_DOWN` | 29 | `"heightdown"` |
+| `GAIT_BALANCE` / `Gait.BALANCE` | 30 | `"balance"` |
+| `GAIT_BOW_BACK` / `Gait.BOW_BACK` | 31 | `"bowback"` |
+| `GAIT_BODY_CYCLE` / `Gait.BODY_CYCLE` | 32 | `"bodycycle"` |
+| `GAIT_HEAD_ELLIPSE` / `Gait.HEAD_ELLIPSE` | 33 | `"headellipse"` |
+| `GAIT_MOVE_LF` / `Gait.MOVE_LF` | 34 | `"moveLF"` |
+| `GAIT_MOVE_RF` / `Gait.MOVE_RF` | 35 | `"moveRF"` |
+| `GAIT_MOVE_LB` / `Gait.MOVE_LB` | 36 | `"moveLB"` |
+| `GAIT_MOVE_RB` / `Gait.MOVE_RB` | 37 | `"moveRB"` |
 
 **C:** `robot_gait_enum(GAIT_ADVANCE);`
 **AS:** `robotGait(Gait.ADVANCE);`
@@ -225,6 +269,28 @@ One-liner actions that combine gait + delay + stop:
 | `robot_stand()` | `stand()` | Stand to init pose |
 | `robot_dance(ms)` | `dance(ms)` | Twerk dance for N ms |
 | `robot_step_in_place(ms)` | `stepInPlace(ms)` | Step in place for N ms |
+| `robot_look_up(ms)` | `lookUp(ms)` | Look up for N ms |
+| `robot_look_down(ms)` | `lookDown(ms)` | Look down for N ms |
+| `robot_look_left(ms)` | `lookLeft(ms)` | Look left for N ms |
+| `robot_look_right(ms)` | `lookRight(ms)` | Look right for N ms |
+| `robot_look_upper_left(ms)` | `lookUpperLeft(ms)` | Look upper-left for N ms |
+| `robot_look_upper_right(ms)` | `lookUpperRight(ms)` | Look upper-right for N ms |
+| `robot_look_lower_left(ms)` | `lookLowerLeft(ms)` | Look lower-left for N ms |
+| `robot_look_lower_right(ms)` | `lookLowerRight(ms)` | Look lower-right for N ms |
+| `robot_foreleg_lift_left(ms)` | `forelegLiftL(ms)` | Lift left foreleg for N ms |
+| `robot_foreleg_lift_right(ms)` | `forelegLiftR(ms)` | Lift right foreleg for N ms |
+| `robot_backleg_lift_left(ms)` | `backlegLiftL(ms)` | Lift left back leg for N ms |
+| `robot_backleg_lift_right(ms)` | `backlegLiftR(ms)` | Lift right back leg for N ms |
+| `robot_height_up(ms)` | `heightUp(ms)` | Raise body height for N ms |
+| `robot_height_down(ms)` | `heightDown(ms)` | Lower body height for N ms |
+| `robot_balance(ms)` | `balance(ms)` | Balance on the spot for N ms |
+| `robot_bow_back(ms)` | `bowBack(ms)` | Bow backward for N ms |
+| `robot_body_cycle(ms)` | `bodyCycle(ms)` | Cycle body for N ms |
+| `robot_head_ellipse(ms)` | `headEllipse(ms)` | Head ellipse motion for N ms |
+| `robot_move_lf(ms)` | `moveLF(ms)` | Move left front leg for N ms |
+| `robot_move_rf(ms)` | `moveRF(ms)` | Move right front leg for N ms |
+| `robot_move_lb(ms)` | `moveLB(ms)` | Move left back leg for N ms |
+| `robot_move_rb(ms)` | `moveRB(ms)` | Move right back leg for N ms |
 
 ### Full Pose Helper
 

@@ -66,22 +66,44 @@ static inline void MPX_print(const char *str, int len) {
  * WAMR sig:     "($)"  — name string (auto-converted)
  *
  * Valid names:
- *   "none"      Stop all gait
- *   "init"      Return to init/stand pose
- *   "step"      Step in place
- *   "roll"      Roll body
- *   "pitch"     Pitch body
- *   "stretch"   Stretch legs
- *   "advance"   Walk forward
- *   "back"      Walk backward
- *   "left"      Sidestep left
- *   "right"     Sidestep right
- *   "turnL"     Turn left
- *   "turnR"     Turn right
- *   "twerk"     Twerk!
- *   "jump"      Jump
- *   "jumpfwd"   Jump forward
- *   "testspeed" Speed test
+ *   "none"       Stop all gait
+ *   "init"       Return to init/stand pose
+ *   "step"       Step in place
+ *   "roll"       Roll body
+ *   "pitch"      Pitch body
+ *   "stretch"    Stretch legs
+ *   "advance"    Walk forward
+ *   "back"       Walk backward
+ *   "left"       Sidestep left
+ *   "right"      Sidestep right
+ *   "turnL"      Turn left
+ *   "turnR"      Turn right
+ *   "twerk"      Twerk!
+ *   "jump"       Jump
+ *   "jumpfwd"    Jump forward
+ *   "testspeed"  Speed test
+ *   "lookup"     Look up (gait-based)
+ *   "lookdown"   Look down (gait-based)
+ *   "lookleft"   Look left (gait-based)
+ *   "lookright"  Look right (gait-based)
+ *   "lookul"     Look upper-left
+ *   "lookur"     Look upper-right
+ *   "lookll"     Look lower-left
+ *   "looklr"     Look lower-right
+ *   "flegL"      Foreleg lift left
+ *   "flegR"      Foreleg lift right
+ *   "blegL"      Backleg lift left
+ *   "blegR"      Backleg lift right
+ *   "heightup"   Height up
+ *   "heightdown" Height down
+ *   "balance"    Balance body
+ *   "bowback"    Bow backward
+ *   "bodycycle"  Cycle body motion
+ *   "headellipse" Head ellipse motion
+ *   "moveLF"     Move left front leg
+ *   "moveRF"     Move right front leg
+ *   "moveLB"     Move left back leg
+ *   "moveRB"     Move right back leg
  */
 extern void robot_gait(int name_ptr);
 
@@ -369,22 +391,44 @@ extern void robot_imu_print(void);
 // ──── 1. Gait enum (no more string typos) ─────────────────────
 
 typedef enum {
-    GAIT_NONE     = 0,
-    GAIT_INIT     = 1,
-    GAIT_STEP     = 2,
-    GAIT_ROLL     = 3,
-    GAIT_PITCH    = 4,
-    GAIT_STRETCH  = 5,
-    GAIT_ADVANCE  = 6,
-    GAIT_BACK     = 7,
-    GAIT_LEFT     = 8,
-    GAIT_RIGHT    = 9,
-    GAIT_TURN_L   = 10,
-    GAIT_TURN_R   = 11,
-    GAIT_TWERK    = 12,
-    GAIT_JUMP     = 13,
-    GAIT_JUMP_FWD = 14,
-    GAIT_TEST_SPD = 15,
+    GAIT_NONE         = 0,
+    GAIT_INIT         = 1,
+    GAIT_STEP         = 2,
+    GAIT_ROLL         = 3,
+    GAIT_PITCH        = 4,
+    GAIT_STRETCH      = 5,
+    GAIT_ADVANCE      = 6,
+    GAIT_BACK         = 7,
+    GAIT_LEFT         = 8,
+    GAIT_RIGHT        = 9,
+    GAIT_TURN_L       = 10,
+    GAIT_TURN_R       = 11,
+    GAIT_TWERK        = 12,
+    GAIT_JUMP         = 13,
+    GAIT_JUMP_FWD     = 14,
+    GAIT_TEST_SPD     = 15,
+    GAIT_LOOK_UP      = 16,
+    GAIT_LOOK_DOWN    = 17,
+    GAIT_LOOK_LEFT    = 18,
+    GAIT_LOOK_RIGHT   = 19,
+    GAIT_LOOK_UL      = 20,
+    GAIT_LOOK_UR      = 21,
+    GAIT_LOOK_LL      = 22,
+    GAIT_LOOK_LR      = 23,
+    GAIT_FORELEG_LIFT_L = 24,
+    GAIT_FORELEG_LIFT_R = 25,
+    GAIT_BACKLEG_LIFT_L = 26,
+    GAIT_BACKLEG_LIFT_R = 27,
+    GAIT_HEIGHT_UP    = 28,
+    GAIT_HEIGHT_DOWN  = 29,
+    GAIT_BALANCE      = 30,
+    GAIT_BOW_BACK     = 31,
+    GAIT_BODY_CYCLE   = 32,
+    GAIT_HEAD_ELLIPSE = 33,
+    GAIT_MOVE_LF      = 34,
+    GAIT_MOVE_RF      = 35,
+    GAIT_MOVE_LB      = 36,
+    GAIT_MOVE_RB      = 37,
 } robot_gait_t;
 
 /**
@@ -397,24 +441,46 @@ static inline void robot_gait_enum(robot_gait_t g) {
     /* String lookup table in WASM linear memory.
      * Must match the order of robot::GaitCmd on the firmware side. */
     static const char *names[] = {
-        "none",     /* 0  GAIT_NONE     */
-        "init",     /* 1  GAIT_INIT     */
-        "step",     /* 2  GAIT_STEP     */
-        "roll",     /* 3  GAIT_ROLL     */
-        "pitch",    /* 4  GAIT_PITCH    */
-        "stretch",  /* 5  GAIT_STRETCH  */
-        "advance",  /* 6  GAIT_ADVANCE  */
-        "back",     /* 7  GAIT_BACK     */
-        "left",     /* 8  GAIT_LEFT     */
-        "right",    /* 9  GAIT_RIGHT    */
-        "turnL",    /* 10 GAIT_TURN_L   */
-        "turnR",    /* 11 GAIT_TURN_R   */
-        "twerk",    /* 12 GAIT_TWERK    */
-        "jump",     /* 13 GAIT_JUMP     */
-        "jumpfwd",  /* 14 GAIT_JUMP_FWD */
-        "testspeed",/* 15 GAIT_TEST_SPD */
+        "none",      /* 0  GAIT_NONE         */
+        "init",      /* 1  GAIT_INIT         */
+        "step",      /* 2  GAIT_STEP         */
+        "roll",      /* 3  GAIT_ROLL         */
+        "pitch",     /* 4  GAIT_PITCH        */
+        "stretch",   /* 5  GAIT_STRETCH      */
+        "advance",   /* 6  GAIT_ADVANCE      */
+        "back",      /* 7  GAIT_BACK         */
+        "left",      /* 8  GAIT_LEFT         */
+        "right",     /* 9  GAIT_RIGHT        */
+        "turnL",     /* 10 GAIT_TURN_L       */
+        "turnR",     /* 11 GAIT_TURN_R       */
+        "twerk",     /* 12 GAIT_TWERK        */
+        "jump",      /* 13 GAIT_JUMP         */
+        "jumpfwd",   /* 14 GAIT_JUMP_FWD     */
+        "testspeed", /* 15 GAIT_TEST_SPD     */
+        "lookup",    /* 16 GAIT_LOOK_UP      */
+        "lookdown",  /* 17 GAIT_LOOK_DOWN    */
+        "lookleft",  /* 18 GAIT_LOOK_LEFT    */
+        "lookright", /* 19 GAIT_LOOK_RIGHT   */
+        "lookul",    /* 20 GAIT_LOOK_UL      */
+        "lookur",    /* 21 GAIT_LOOK_UR      */
+        "lookll",    /* 22 GAIT_LOOK_LL      */
+        "looklr",    /* 23 GAIT_LOOK_LR      */
+        "flegL",     /* 24 GAIT_FORELEG_LIFT_L */
+        "flegR",     /* 25 GAIT_FORELEG_LIFT_R */
+        "blegL",     /* 26 GAIT_BACKLEG_LIFT_L */
+        "blegR",     /* 27 GAIT_BACKLEG_LIFT_R */
+        "heightup",  /* 28 GAIT_HEIGHT_UP    */
+        "heightdown",/* 29 GAIT_HEIGHT_DOWN  */
+        "balance",   /* 30 GAIT_BALANCE      */
+        "bowback",   /* 31 GAIT_BOW_BACK     */
+        "bodycycle", /* 32 GAIT_BODY_CYCLE   */
+        "headellipse",/* 33 GAIT_HEAD_ELLIPSE */
+        "moveLF",    /* 34 GAIT_MOVE_LF      */
+        "moveRF",    /* 35 GAIT_MOVE_RF      */
+        "moveLB",    /* 36 GAIT_MOVE_LB      */
+        "moveRB",    /* 37 GAIT_MOVE_RB      */
     };
-    if (g >= GAIT_NONE && g <= GAIT_TEST_SPD) {
+    if (g >= GAIT_NONE && g <= GAIT_MOVE_RB) {
         robot_gait((int)names[(int)g]);
     }
 }
@@ -557,6 +623,160 @@ static inline void robot_step_in_place(int ms) {
     robot_gait_enum(GAIT_NONE);
 }
 
+/** Look up for N ms, using gait-based head control. */
+static inline void robot_look_up(int ms) {
+    robot_gait_enum(GAIT_LOOK_UP);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look down for N ms, using gait-based head control. */
+static inline void robot_look_down(int ms) {
+    robot_gait_enum(GAIT_LOOK_DOWN);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look left for N ms, using gait-based head control. */
+static inline void robot_look_left(int ms) {
+    robot_gait_enum(GAIT_LOOK_LEFT);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look right for N ms, using gait-based head control. */
+static inline void robot_look_right(int ms) {
+    robot_gait_enum(GAIT_LOOK_RIGHT);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look upper-left for N ms, using gait-based head control. */
+static inline void robot_look_upper_left(int ms) {
+    robot_gait_enum(GAIT_LOOK_UL);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look upper-right for N ms, using gait-based head control. */
+static inline void robot_look_upper_right(int ms) {
+    robot_gait_enum(GAIT_LOOK_UR);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look lower-left for N ms, using gait-based head control. */
+static inline void robot_look_lower_left(int ms) {
+    robot_gait_enum(GAIT_LOOK_LL);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Look lower-right for N ms, using gait-based head control. */
+static inline void robot_look_lower_right(int ms) {
+    robot_gait_enum(GAIT_LOOK_LR);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Lift left foreleg for N ms. */
+static inline void robot_foreleg_lift_left(int ms) {
+    robot_gait_enum(GAIT_FORELEG_LIFT_L);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Lift right foreleg for N ms. */
+static inline void robot_foreleg_lift_right(int ms) {
+    robot_gait_enum(GAIT_FORELEG_LIFT_R);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Lift left back leg for N ms. */
+static inline void robot_backleg_lift_left(int ms) {
+    robot_gait_enum(GAIT_BACKLEG_LIFT_L);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Lift right back leg for N ms. */
+static inline void robot_backleg_lift_right(int ms) {
+    robot_gait_enum(GAIT_BACKLEG_LIFT_R);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Raise body height for N ms. */
+static inline void robot_height_up(int ms) {
+    robot_gait_enum(GAIT_HEIGHT_UP);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Lower body height for N ms. */
+static inline void robot_height_down(int ms) {
+    robot_gait_enum(GAIT_HEIGHT_DOWN);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Balance on the spot for N ms. */
+static inline void robot_balance(int ms) {
+    robot_gait_enum(GAIT_BALANCE);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Bow backward for N ms. */
+static inline void robot_bow_back(int ms) {
+    robot_gait_enum(GAIT_BOW_BACK);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Cycle body for N ms. */
+static inline void robot_body_cycle(int ms) {
+    robot_gait_enum(GAIT_BODY_CYCLE);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Head ellipse motion for N ms. */
+static inline void robot_head_ellipse(int ms) {
+    robot_gait_enum(GAIT_HEAD_ELLIPSE);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Move left front leg for N ms. */
+static inline void robot_move_lf(int ms) {
+    robot_gait_enum(GAIT_MOVE_LF);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Move right front leg for N ms. */
+static inline void robot_move_rf(int ms) {
+    robot_gait_enum(GAIT_MOVE_RF);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Move left back leg for N ms. */
+static inline void robot_move_lb(int ms) {
+    robot_gait_enum(GAIT_MOVE_LB);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
+/** Move right back leg for N ms. */
+static inline void robot_move_rb(int ms) {
+    robot_gait_enum(GAIT_MOVE_RB);
+    robot_delay_ms(ms);
+    robot_gait_enum(GAIT_NONE);
+}
+
 // ──── 6. Full pose helper (all 12 servos at once) ────────────
 
 typedef struct {
@@ -667,6 +887,28 @@ static inline void MPX_print_int(int value) {
  *   void   robot_stand(void);
  *   void   robot_dance(int ms);
  *   void   robot_step_in_place(int ms);
+ *   void   robot_look_up(int ms);
+ *   void   robot_look_down(int ms);
+ *   void   robot_look_left(int ms);
+ *   void   robot_look_right(int ms);
+ *   void   robot_look_upper_left(int ms);
+ *   void   robot_look_upper_right(int ms);
+ *   void   robot_look_lower_left(int ms);
+ *   void   robot_look_lower_right(int ms);
+ *   void   robot_foreleg_lift_left(int ms);
+ *   void   robot_foreleg_lift_right(int ms);
+ *   void   robot_backleg_lift_left(int ms);
+ *   void   robot_backleg_lift_right(int ms);
+ *   void   robot_height_up(int ms);
+ *   void   robot_height_down(int ms);
+ *   void   robot_balance(int ms);
+ *   void   robot_bow_back(int ms);
+ *   void   robot_body_cycle(int ms);
+ *   void   robot_head_ellipse(int ms);
+ *   void   robot_move_lf(int ms);
+ *   void   robot_move_rf(int ms);
+ *   void   robot_move_lb(int ms);
+ *   void   robot_move_rb(int ms);
  *   void   robot_apply_pose(robot_pose_t p);
  *   void   MPX_print_int(int value);
  * ═══════════════════════════════════════════════════════════════════ */

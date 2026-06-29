@@ -98,22 +98,44 @@ export declare function robot_imu_print(): void;
 // ──── 1. Gait enum ──────────────────────────────────────────────
 
 export const enum Gait {
-    NONE     = 0,
-    INIT     = 1,
-    STEP     = 2,
-    ROLL     = 3,
-    PITCH    = 4,
-    STRETCH  = 5,
-    ADVANCE  = 6,
-    BACK     = 7,
-    LEFT     = 8,
-    RIGHT    = 9,
-    TURN_L   = 10,
-    TURN_R   = 11,
-    TWERK    = 12,
-    JUMP     = 13,
-    JUMP_FWD = 14,
-    TEST_SPD = 15,
+    NONE         = 0,
+    INIT         = 1,
+    STEP         = 2,
+    ROLL         = 3,
+    PITCH        = 4,
+    STRETCH      = 5,
+    ADVANCE      = 6,
+    BACK         = 7,
+    LEFT         = 8,
+    RIGHT        = 9,
+    TURN_L       = 10,
+    TURN_R       = 11,
+    TWERK        = 12,
+    JUMP         = 13,
+    JUMP_FWD     = 14,
+    TEST_SPD     = 15,
+    LOOK_UP      = 16,
+    LOOK_DOWN    = 17,
+    LOOK_LEFT    = 18,
+    LOOK_RIGHT   = 19,
+    LOOK_UL      = 20,
+    LOOK_UR      = 21,
+    LOOK_LL      = 22,
+    LOOK_LR      = 23,
+    FORELEG_LIFT_L = 24,
+    FORELEG_LIFT_R = 25,
+    BACKLEG_LIFT_L = 26,
+    BACKLEG_LIFT_R = 27,
+    HEIGHT_UP    = 28,
+    HEIGHT_DOWN  = 29,
+    BALANCE      = 30,
+    BOW_BACK     = 31,
+    BODY_CYCLE   = 32,
+    HEAD_ELLIPSE = 33,
+    MOVE_LF      = 34,
+    MOVE_RF      = 35,
+    MOVE_LB      = 36,
+    MOVE_RB      = 37,
 }
 
 const GAIT_NAMES: StaticArray<u8[]> = [
@@ -133,12 +155,34 @@ const GAIT_NAMES: StaticArray<u8[]> = [
     [0x6a, 0x75, 0x6d, 0x70],                               // "jump"
     [0x6a, 0x75, 0x6d, 0x70, 0x66, 0x77, 0x64],             // "jumpfwd"
     [0x74, 0x65, 0x73, 0x74, 0x73, 0x70, 0x65, 0x65, 0x64], // "testspeed"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x75, 0x70],                   // "lookup"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x64, 0x6f, 0x77, 0x6e],       // "lookdown"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x6c, 0x65, 0x66, 0x74],       // "lookleft"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x72, 0x69, 0x67, 0x68, 0x74], // "lookright"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x75, 0x6c],                   // "lookul"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x75, 0x72],                   // "lookur"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x6c, 0x6c],                   // "lookll"
+    [0x6c, 0x6f, 0x6f, 0x6b, 0x6c, 0x72],                   // "looklr"
+    [0x66, 0x6c, 0x65, 0x67, 0x4c],                         // "flegL"
+    [0x66, 0x6c, 0x65, 0x67, 0x52],                         // "flegR"
+    [0x62, 0x6c, 0x65, 0x67, 0x4c],                         // "blegL"
+    [0x62, 0x6c, 0x65, 0x67, 0x52],                         // "blegR"
+    [0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x75, 0x70],       // "heightup"
+    [0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x64, 0x6f, 0x77, 0x6e], // "heightdown"
+    [0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65],             // "balance"
+    [0x62, 0x6f, 0x77, 0x62, 0x61, 0x63, 0x6b],             // "bowback"
+    [0x62, 0x6f, 0x64, 0x79, 0x63, 0x79, 0x63, 0x6c, 0x65], // "bodycycle"
+    [0x68, 0x65, 0x61, 0x64, 0x65, 0x6c, 0x6c, 0x69, 0x70, 0x73, 0x65], // "headellipse"
+    [0x6d, 0x6f, 0x76, 0x65, 0x4c, 0x46],                   // "moveLF"
+    [0x6d, 0x6f, 0x76, 0x65, 0x52, 0x46],                   // "moveRF"
+    [0x6d, 0x6f, 0x76, 0x65, 0x4c, 0x42],                   // "moveLB"
+    [0x6d, 0x6f, 0x76, 0x65, 0x52, 0x42],                   // "moveRB"
 ];
 
 /** Start a gait using the type-safe enum. */
 export function robotGait(g: Gait): void {
     const idx = g as i32;
-    if (idx < 0 || idx > 15) return;
+    if (idx < 0 || idx > 37) return;
     const name = GAIT_NAMES[idx];
     robot_gait(changetype<usize>(name));
 }
@@ -248,6 +292,140 @@ export function jump(): void {
 export function stand(): void {
     robotGait(Gait.INIT);
     robot_delay_ms(2000);
+}
+
+// ──── 6. New gait choreography helpers ─────────────────────────
+
+export function lookUp(ms: i32): void {
+    robotGait(Gait.LOOK_UP);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookDown(ms: i32): void {
+    robotGait(Gait.LOOK_DOWN);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookLeft(ms: i32): void {
+    robotGait(Gait.LOOK_LEFT);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookRight(ms: i32): void {
+    robotGait(Gait.LOOK_RIGHT);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookUpperLeft(ms: i32): void {
+    robotGait(Gait.LOOK_UL);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookUpperRight(ms: i32): void {
+    robotGait(Gait.LOOK_UR);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookLowerLeft(ms: i32): void {
+    robotGait(Gait.LOOK_LL);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function lookLowerRight(ms: i32): void {
+    robotGait(Gait.LOOK_LR);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function forelegLiftL(ms: i32): void {
+    robotGait(Gait.FORELEG_LIFT_L);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function forelegLiftR(ms: i32): void {
+    robotGait(Gait.FORELEG_LIFT_R);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function backlegLiftL(ms: i32): void {
+    robotGait(Gait.BACKLEG_LIFT_L);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function backlegLiftR(ms: i32): void {
+    robotGait(Gait.BACKLEG_LIFT_R);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function heightUp(ms: i32): void {
+    robotGait(Gait.HEIGHT_UP);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function heightDown(ms: i32): void {
+    robotGait(Gait.HEIGHT_DOWN);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function balance(ms: i32): void {
+    robotGait(Gait.BALANCE);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function bowBack(ms: i32): void {
+    robotGait(Gait.BOW_BACK);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function bodyCycle(ms: i32): void {
+    robotGait(Gait.BODY_CYCLE);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function headEllipse(ms: i32): void {
+    robotGait(Gait.HEAD_ELLIPSE);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function moveLF(ms: i32): void {
+    robotGait(Gait.MOVE_LF);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function moveRF(ms: i32): void {
+    robotGait(Gait.MOVE_RF);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function moveLB(ms: i32): void {
+    robotGait(Gait.MOVE_LB);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
+}
+
+export function moveRB(ms: i32): void {
+    robotGait(Gait.MOVE_RB);
+    robot_delay_ms(ms);
+    robotGait(Gait.NONE);
 }
 
 export function dance(ms: i32): void {
