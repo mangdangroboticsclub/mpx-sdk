@@ -1,0 +1,39 @@
+// {name} — a movement for the MPX-Dog, in AssemblyScript.
+//
+//     mpx-cli deploy          build, upload, run
+//     mpx-cli logs -f         watch what it says
+//
+// The bindings in src/mpx_env.ts are GENERATED from the firmware's own symbol
+// table. `mpx-cli build` checks they match the SDK and tells you to run
+// `mpx-cli sync` if they have fallen behind.
+//
+// Note: AssemblyScript gets the raw host functions, not the friendly C layer.
+// Angles here are centidegrees relative to centre, and nothing moves until
+// robot_flush().
+import * as mpx from "./mpx_env";
+
+function log(s: string): void {{
+  const buf = String.UTF8.encode(s);
+  mpx.print(changetype<usize>(buf), buf.byteLength);
+}}
+
+export function on_start(): void {{
+  if (mpx.mpx_abi_version() != mpx.MPX_ABI_VERSION) {{
+    log("ABI mismatch — rebuild: mpx-cli deploy");
+    return;
+  }}
+
+  log("{name} starting");
+
+  // Stand, walk forward for two seconds, stand again.
+  mpx.robot_gait(changetype<usize>(String.UTF8.encode("init", true)));
+  mpx.robot_delay_ms(800);
+
+  mpx.robot_gait(changetype<usize>(String.UTF8.encode("advance", true)));
+  mpx.robot_delay_ms(2000);
+
+  mpx.robot_gait(changetype<usize>(String.UTF8.encode("init", true)));
+  mpx.robot_delay_ms(800);
+
+  log("{name} done");
+}}

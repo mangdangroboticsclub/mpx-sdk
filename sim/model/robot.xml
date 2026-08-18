@@ -1,0 +1,322 @@
+<mujoco model="mini_pupper_2">
+  <default>
+    <!-- Joint physics defaults -->
+    <default class="joint">
+      <joint 
+        armature="0.015"
+        damping="5.0"
+        frictionloss="0.5"
+        stiffness="100.0"
+        limited="true"
+        range="-2.3562 2.3562"
+      />
+    </default>
+    
+    <!-- Actuator defaults -->
+    <default class="actuator">
+      <position kp="875" kv="8" ctrlrange="-2.3562 2.3562" ctrllimited="true" />
+    </default>
+    
+    <!-- Robot defaults -->
+    <default class="robot">
+      <default class="visual">
+        <geom contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom contype="1" conaffinity="1" group="3" 
+              friction="1.0 0.005 0.0001" 
+              solref="0.02 0.8" solimp="0.95 0.99 0.001" margin="0.001"/>
+          
+      </default>
+    </default>
+    
+    <default class="floor">
+      <geom type="plane" size="0 0 0.05" material="groundplane" 
+            contype="1" conaffinity="1" group="1" friction="1.0 0.005 0.0001" 
+            solref="0.02 0.8" solimp="0.95 0.99 0.001" />
+    </default>
+  </default>
+
+  <compiler angle="radian" meshdir="." balanceinertia="true"/>
+
+  <visual>
+    <global offwidth="3840" offheight="2160" />
+  </visual>
+
+  <worldbody>
+    <body name="base_link" childclass="robot" pos="0 0 0.12">
+      <!-- base_link's real mass lives in the base_inertia child below.
+           Without this, MuJoCo infers 1.6 kg from the mesh volume at its
+           default 1000 kg/m3 and the whole robot weighs 3x what it does. -->
+      <inertial pos="0 0 0" mass="1e-6" diaginertia="1e-9 1e-9 1e-9"/>
+      <geom name="base_link_collision" type="mesh" mesh="base_link_collision_base_link" class="collision" />
+      <geom name="base_link_visual" type="mesh" mesh="base_link_base_link" material="opaque252525" class="visual" />
+      <body name="base_inertia">
+        <inertial pos="-0.008867 0.000396 -0.007154" mass="0.43721000000000004" diaginertia="0.002273475 0.0106679 0.011017675" />
+      </body>
+      <body name="lf1" pos="0.05 0.0235 0.0">
+        <inertial pos="0.020109 0.002332 0.006500" mass="0.051922499999999996" diaginertia="6.2351525e-06 9.339765e-06 8.0572725e-06" />
+        <joint name="base_lf1" type="hinge" axis="1.0 0.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+        <geom name="lf1_collision" type="mesh" mesh="lf1_collision_lf1" class="collision" />
+        <geom name="lf1_visual" type="mesh" mesh="lf1_lf1" material="opaque666666" class="visual" />
+        <body name="lf2" pos="-4E-05 0.0197 0">
+          <inertial pos="-0.003174 0.000986 -0.017984" mass="0.004765" diaginertia="1.155385e-06 1.2029349999999999e-06 6.72325e-08" />
+          <joint name="lf1_lf2" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+          <geom name="lf2_collision" type="mesh" mesh="lf2_collision_lf2" class="collision" />
+          <geom name="lf2_visual" type="mesh" mesh="lf2_lf2" material="opaque636363" class="visual" />
+          <body name="lf3" pos="0 0.00475 -0.05">
+            <inertial pos="0.006211 0.003456 -0.015014" mass="0.00286" diaginertia="1.2111775e-06 1.4190375e-06 2.295325e-07" />
+            <joint name="lf2_lf3" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+            <geom name="lf3_collision" type="mesh" mesh="lf3_collision_lf3" class="collision" />
+            <geom name="lf3_visual" type="mesh" mesh="lf3_lf3" material="opaque252525" class="visual" />
+            <body name="lffoot" pos="0 0 -0.056">
+              <inertial pos="-0.014 0.00025 0.002488" mass="0.0035125" diaginertia="1.049875e-07 1.5600000000000002e-07 7.4495e-08" />
+              <geom name="lffoot_collision" type="mesh" mesh="lffoot_collision_lffoot" class="collision" />
+              <geom name="lffoot_visual" type="mesh" mesh="lffoot_lffoot" material="opaque666666" class="visual" />
+            </body>
+          </body>
+          <body name="lpf2" pos="0 0.01 -0.05">
+            <inertial pos="-0.001747 0.007904 0.005365" mass="0.0055775" diaginertia="2.1564175e-06 2.4785075e-06 3.476e-07" />
+            <geom name="lpf2_collision" type="mesh" mesh="lpf2_collision_lpf2" class="collision" />
+            <geom name="lpf2_visual" type="mesh" mesh="lpf2_lpf2" material="opaque2552210" class="visual" />
+          </body>
+        </body>
+        <body name="lpf1" pos="0.01076 0.0307 0.013">
+          <inertial pos="0.002259 0.008667 -0.002748" mass="0.006435" diaginertia="9.76475e-07 1.03111e-06 6.158425e-07" />
+          <geom name="lpf1_collision" type="mesh" mesh="lpf1_collision_lpf1" class="collision" />
+          <geom name="lpf1_visual" type="mesh" mesh="lpf1_lpf1" material="opaque2552210" class="visual" />
+        </body>
+      </body>
+      <body name="rf1" pos="0.05 -0.0235 0.0">
+        <inertial pos="0.020109 -0.002332 0.006500" mass="0.051922499999999996" diaginertia="6.2351525e-06 9.339765e-06 8.0572725e-06" />
+        <joint name="base_rf1" type="hinge" axis="1.0 0.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+        <geom name="rf1_collision" type="mesh" mesh="rf1_collision_rf1" class="collision" />
+        <geom name="rf1_visual" type="mesh" mesh="rf1_rf1" material="opaque666666" class="visual" />
+        <body name="rf2" pos="-4E-05 -0.0197 0">
+          <inertial pos="-0.003174 -0.000986 -0.017984" mass="0.004765" diaginertia="1.155385e-06 1.2029349999999999e-06 6.72325e-08" />
+          <joint name="rf1_rf2" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+          <geom name="rf2_collision" type="mesh" mesh="rf2_collision_rf2" class="collision" />
+          <geom name="rf2_visual" type="mesh" mesh="rf2_rf2" material="opaque636363" class="visual" />
+          <body name="rf3" pos="0 -0.00475 -0.05">
+            <inertial pos="0.006211 -0.003456 -0.015014" mass="0.00286" diaginertia="1.2111775e-06 1.4190375e-06 2.295325e-07" />
+            <joint name="rf2_rf3" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+            <geom name="rf3_collision" type="mesh" mesh="rf3_collision_rf3" class="collision" />
+            <geom name="rf3_visual" type="mesh" mesh="rf3_rf3" material="opaque252525" class="visual" />
+            <body name="rffoot" pos="0 0 -0.056">
+              <inertial pos="-0.014 0.00025 0.002488" mass="0.0035125" diaginertia="1.049875e-07 1.5600000000000002e-07 7.4495e-08" />
+              <geom name="rffoot_collision" type="mesh" mesh="rffoot_collision_rffoot" class="collision" />
+              <geom name="rffoot_visual" type="mesh" mesh="rffoot_rffoot" material="opaque666666" class="visual" />
+            </body>
+          </body>
+          <body name="rpf2" pos="0 -0.01 -0.05">
+            <inertial pos="-0.001747 -0.007904 0.005365" mass="0.0055775" diaginertia="2.1564175e-06 2.4785075e-06 3.476e-07" />
+            <geom name="rpf2_collision" type="mesh" mesh="rpf2_collision_rpf2" class="collision" />
+            <geom name="rpf2_visual" type="mesh" mesh="rpf2_rpf2" material="opaque2552210" class="visual" />
+          </body>
+        </body>
+        <body name="rpf1" pos="0.01076 -0.0307 0.013">
+          <inertial pos="0.002259 -0.008667 -0.002748" mass="0.006435" diaginertia="9.76475e-07 1.03111e-06 6.158425e-07" />
+          <geom name="rpf1_collision" type="mesh" mesh="rpf1_collision_rpf1" class="collision" />
+          <geom name="rpf1_visual" type="mesh" mesh="rpf1_rpf1" material="opaque2552210" class="visual" />
+        </body>
+      </body>
+      <body name="rb1" pos="-0.066 -0.0235 0.0">
+        <inertial pos="-0.020109 -0.002332 0.006500" mass="0.051922499999999996" diaginertia="6.2351525e-06 9.339765e-06 8.0572725e-06" />
+        <joint name="base_rb1" type="hinge" axis="1.0 0.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+        <geom name="rb1_collision" type="mesh" mesh="rb1_collision_rb1" class="collision" />
+        <geom name="rb1_visual" type="mesh" mesh="rb1_rb1" material="opaque666666" class="visual" />
+        <body name="rb2" pos="-4E-05 -0.0197 0">
+          <inertial pos="-0.003174 -0.000986 -0.017984" mass="0.004765" diaginertia="1.155385e-06 1.2029349999999999e-06 6.72325e-08" />
+          <joint name="rb1_rb2" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+          <geom name="rb2_collision" type="mesh" mesh="rb2_collision_rb2" class="collision" />
+          <geom name="rb2_visual" type="mesh" mesh="rb2_rb2" material="opaque636363" class="visual" />
+          <body name="rb3" pos="0 -0.00475 -0.05">
+            <inertial pos="0.006211 -0.003456 -0.015014" mass="0.00286" diaginertia="1.21204e-06 1.4197074999999998e-06 2.294425e-07" />
+            <joint name="rb2_rb3" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+            <geom name="rb3_collision" type="mesh" mesh="rb3_collision_rb3" class="collision" />
+            <geom name="rb3_visual" type="mesh" mesh="rb3_rb3" material="opaque252525" class="visual" />
+            <body name="rbfoot" pos="0 0 -0.056">
+              <inertial pos="-0.014 0.00025 0.002488" mass="0.0035125" diaginertia="1.049875e-07 1.5600000000000002e-07 7.4495e-08" />
+              <geom name="rbfoot_collision" type="mesh" mesh="rbfoot_collision_rbfoot" class="collision" />
+              <geom name="rbfoot_visual" type="mesh" mesh="rbfoot_rbfoot" material="opaque666666" class="visual" />
+            </body>
+          </body>
+          <body name="rpb2" pos="0 -0.01 -0.05">
+            <inertial pos="-0.001747 -0.007904 0.005365" mass="0.0055775" diaginertia="2.1564175e-06 2.4785075e-06 3.476e-07" />
+            <geom name="rpb2_collision" type="mesh" mesh="rpb2_collision_rpb2" class="collision" />
+            <geom name="rpb2_visual" type="mesh" mesh="rpb2_rpb2" material="opaque2552210" class="visual" />
+          </body>
+        </body>
+        <body name="rpb1" pos="0.01076 -0.0307 0.013">
+          <inertial pos="0.002259 -0.008667 -0.002748" mass="0.006435" diaginertia="9.76475e-07 1.03111e-06 6.158425e-07" />
+          <geom name="rpb1_collision" type="mesh" mesh="rpb1_collision_rpb1" class="collision" />
+          <geom name="rpb1_visual" type="mesh" mesh="rpb1_rpb1" material="opaque2552210" class="visual" />
+        </body>
+      </body>
+      <body name="lb1" pos="-0.066 0.0235 0.0">
+        <inertial pos="-0.020109 0.002332 0.006500" mass="0.051922499999999996" diaginertia="6.2351525e-06 9.339765e-06 8.0572725e-06" />
+        <joint name="base_lb1" type="hinge" axis="1.0 0.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+        <geom name="lb1_collision" type="mesh" mesh="lb1_collision_lb1" class="collision" />
+        <geom name="lb1_visual" type="mesh" mesh="lb1_lb1" material="opaque666666" class="visual" />
+        <body name="lb2" pos="-4E-05 0.0197 0">
+          <inertial pos="-0.003174 0.000986 -0.017984" mass="0.004765" diaginertia="1.155385e-06 1.2029349999999999e-06 6.72325e-08" />
+          <joint name="lb1_lb2" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+          <geom name="lb2_collision" type="mesh" mesh="lb2_collision_lb2" class="collision" />
+          <geom name="lb2_visual" type="mesh" mesh="lb2_lb2" material="opaque636363" class="visual" />
+          <body name="lb3" pos="0 0.00475 -0.05">
+            <inertial pos="0.006211 0.003456 -0.015014" mass="0.00286" diaginertia="1.2111775e-06 1.4190375e-06 2.295325e-07" />
+            <joint name="lb2_lb3" type="hinge" axis="0.0 1.0 0.0" class="joint" range="-2.3562 2.3562" limited="true" />
+            <geom name="lb3_collision" type="mesh" mesh="lb3_collision_lb3" class="collision" />
+            <geom name="lb3_visual" type="mesh" mesh="lb3_lb3" material="opaque252525" class="visual" />
+            <body name="lbfoot" pos="0 0 -0.056">
+              <inertial pos="-0.014 0.00025 0.002488" mass="0.0035125" diaginertia="1.049875e-07 1.5600000000000002e-07 7.4495e-08" />
+              <geom name="lbfoot_collision" type="mesh" mesh="lbfoot_collision_lbfoot" class="collision" />
+              <geom name="lbfoot_visual" type="mesh" mesh="lbfoot_lbfoot" material="opaque666666" class="visual" />
+            </body>
+          </body>
+          <body name="lpb2" pos="0 0.01 -0.05">
+            <inertial pos="-0.001747 0.007904 0.005365" mass="0.0055775" diaginertia="2.1564175e-06 2.4785075e-06 3.476e-07" />
+            <geom name="lpb2_collision" type="mesh" mesh="lpb2_collision_lpb2" class="collision" />
+            <geom name="lpb2_visual" type="mesh" mesh="lpb2_lpb2" material="opaque2552210" class="visual" />
+          </body>
+        </body>
+        <body name="lpb1" pos="0.01076 0.0307 0.013">
+          <inertial pos="0.002259 0.008667 -0.002748" mass="0.006435" diaginertia="9.76475e-07 1.03111e-06 6.158425e-07" />
+          <geom name="lpb1_collision" type="mesh" mesh="lpb1_collision_lpb1" class="collision" />
+          <geom name="lpb1_visual" type="mesh" mesh="lpb1_lpb1" material="opaque2552210" class="visual" />
+        </body>
+      </body>
+      <body name="Body_front" pos="0.089299 -5e-06 -0.015543">
+        <inertial pos="-0.005539 -0.000204 0.020223" mass="0.019637896778702972" diaginertia="1.326512e-05 4.5940525e-06 9.04935e-06" />
+        <geom name="Body_front_collision" pos="-0.089299 0 0.015543" type="mesh" mesh="Body_front_collision_Body_front" class="collision" />
+        <geom name="Body_front_visual" pos="-0.089299 0 0.015543" type="mesh" mesh="Body_front_Body_front" material="opaque2552210" class="visual" />
+      </body>
+      <body name="Board_PCB" pos="-0.087701 -0.023505 0.026457">
+        <inertial pos="0.089461 0.023505 0.0" mass="0.035653881504482635" diaginertia="1.1064912499999999e-05 8.64019375e-05 9.73861025e-05" />
+        <geom name="Board_PCB_collision" pos="0.087701 0.023505 -0.026457" type="mesh" mesh="Board_PCB_collision_Board_PCB" class="collision" />
+        <geom name="Board_PCB_visual" pos="0.087701 0.023505 -0.026457" type="mesh" mesh="Board_PCB_Board_PCB" material="opaque636363" class="visual" />
+        <body name="Board_connectors_1" pos="0.149035 0.023472 0.0">
+          <geom name="Board_connectors_1_collision" pos="-0.061334 3.3e-05 -0.026457" type="mesh" mesh="Board_connectors_1_collision_Board_connectors_1" class="collision" />
+          <geom name="Board_connectors_1_visual" pos="-0.061334 3.3e-05 -0.026457" type="mesh" mesh="Board_connectors_1_Board_connectors_1" material="opaque2491590" class="visual" />
+        </body>
+        <body name="Board_connectors_2" pos="0.042355 0.0235 0.0">
+          <geom name="Board_connectors_2_collision" pos="0.045346 5e-06 -0.026457" type="mesh" mesh="Board_connectors_2_collision_Board_connectors_2" class="collision" />
+          <geom name="Board_connectors_2_visual" pos="0.045346 5e-06 -0.026457" type="mesh" mesh="Board_connectors_2_Board_connectors_2" material="opaque255255255" class="visual" />
+        </body>
+      </body>
+      <body name="Shell_Side" pos="-0.002701 -0.030005 -0.016293">
+        <inertial pos="-0.00003 0.030005 0.022371" mass="0.012982208847500443" diaginertia="1.458588e-05 8.03718e-06 1.7491285e-05" />
+        <geom name="Shell_Side_collision" pos="0.002701 0.030005 0.016293" type="mesh" mesh="Shell_Side_collision_Shell_Side" class="collision" />
+        <geom name="Shell_Side_visual" pos="0.002701 0.030005 0.016293" type="mesh" mesh="Shell_Side_Shell_Side" material="opaque2552210" class="visual" />
+      </body>
+      <body name="imu_link">
+        <inertial pos="0 0 0" mass="0.0001" diaginertia="1e-09 1e-09 1e-09" />
+      </body>
+      <freejoint name="floating_base" />
+    </body>
+    <light pos="0 0 2." dir="0 0 -1" directional="true" />
+    <geom name="floor" class="floor" size="0 0 0.05" />
+  </worldbody>
+
+  <asset>
+    <material name="opaque666666" rgba="0.25882352941176473 0.25882352941176473 0.25882352941176473 1.0" />
+    <material name="opaque252525" rgba="0.09803921568627451 0.09803921568627451 0.09803921568627451 1.0" />
+    <material name="opaque636363" rgba="0.25098039215686274 0.25098039215686274 0.25098039215686274 1.0" />
+    <material name="opaque2552210" rgba="1.0 0.8666666666666667 0.0 1.0" />
+    <material name="opaque2491590" rgba="0.9764705882352941 0.6235294117647059 0.0 1.0" />
+    <material name="opaque255255255" rgba="1.0 1.0 1.0 1.0" />
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <mesh name="base_link_collision_base_link" file="meshes/mini_pupper_description/meshes/mini_pupper_2/base_link.stl" />
+    <mesh name="base_link_base_link" file="meshes/mini_pupper_description/meshes/mini_pupper_2/base_link.stl" />
+    <mesh name="lf1_collision_lf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lf1.stl" />
+    <mesh name="lf1_lf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lf1.stl" />
+    <mesh name="lf2_collision_lf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lf2.stl" />
+    <mesh name="lf2_lf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lf2.stl" />
+    <mesh name="lf3_collision_lf3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lf3.stl" />
+    <mesh name="lf3_lf3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lf3.stl" />
+    <mesh name="lffoot_collision_lffoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lffoot.stl" />
+    <mesh name="lffoot_lffoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lffoot.stl" />
+    <mesh name="lpf2_collision_lpf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpf2.stl" />
+    <mesh name="lpf2_lpf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpf2.stl" />
+    <mesh name="lpf1_collision_lpf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpf1.stl" />
+    <mesh name="lpf1_lpf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpf1.stl" />
+    <mesh name="rf1_collision_rf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rf1.stl" />
+    <mesh name="rf1_rf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rf1.stl" />
+    <mesh name="rf2_collision_rf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rf2.stl" inertia="shell" />
+    <mesh name="rf2_rf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rf2.stl" inertia="shell" />
+    <mesh name="rf3_collision_rf3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rf3.stl" />
+    <mesh name="rf3_rf3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rf3.stl" />
+    <mesh name="rffoot_collision_rffoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rffoot.stl" />
+    <mesh name="rffoot_rffoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rffoot.stl" />
+    <mesh name="rpf2_collision_rpf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpf2.stl" />
+    <mesh name="rpf2_rpf2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpf2.stl" />
+    <mesh name="rpf1_collision_rpf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpf1.stl" />
+    <mesh name="rpf1_rpf1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpf1.stl" />
+    <mesh name="rb1_collision_rb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rb1.stl" />
+    <mesh name="rb1_rb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rb1.stl" />
+    <mesh name="rb2_collision_rb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rb2.stl" />
+    <mesh name="rb2_rb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rb2.stl" />
+    <mesh name="rb3_collision_rb3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rb3.stl" />
+    <mesh name="rb3_rb3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rb3.stl" />
+    <mesh name="rbfoot_collision_rbfoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rbfoot.stl" />
+    <mesh name="rbfoot_rbfoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rbfoot.stl" />
+    <mesh name="rpb2_collision_rpb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpb2.stl" />
+    <mesh name="rpb2_rpb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpb2.stl" />
+    <mesh name="rpb1_collision_rpb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpb1.stl" />
+    <mesh name="rpb1_rpb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/rpb1.stl" />
+    <mesh name="lb1_collision_lb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lb1.stl" />
+    <mesh name="lb1_lb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lb1.stl" />
+    <mesh name="lb2_collision_lb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lb2.stl" />
+    <mesh name="lb2_lb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lb2.stl" />
+    <mesh name="lb3_collision_lb3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lb3.stl" />
+    <mesh name="lb3_lb3" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lb3.stl" />
+    <mesh name="lbfoot_collision_lbfoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lbfoot.stl" />
+    <mesh name="lbfoot_lbfoot" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lbfoot.stl" />
+    <mesh name="lpb2_collision_lpb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpb2.stl" />
+    <mesh name="lpb2_lpb2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpb2.stl" />
+    <mesh name="lpb1_collision_lpb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpb1.stl" />
+    <mesh name="lpb1_lpb1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lpb1.stl" />
+    <mesh name="Body_front_collision_Body_front" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Body_front.stl" />
+    <mesh name="Body_front_Body_front" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Body_front.stl" />
+    <mesh name="Board_PCB_collision_Board_PCB" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Board_PCB.stl" />
+    <mesh name="Board_PCB_Board_PCB" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Board_PCB.stl" />
+    <mesh name="Board_connectors_1_collision_Board_connectors_1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Board_connectors_1.stl" />
+    <mesh name="Board_connectors_1_Board_connectors_1" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Board_connectors_1.stl" />
+    <mesh name="Board_connectors_2_collision_Board_connectors_2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Board_connectors_2.stl" />
+    <mesh name="Board_connectors_2_Board_connectors_2" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Board_connectors_2.stl" />
+    <mesh name="lidar_link_collision_lidar" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lidar.stl" />
+    <mesh name="lidar_link_lidar" file="meshes/mini_pupper_description/meshes/mini_pupper_2/lidar.stl" />
+    <mesh name="Shell_Side_collision_Shell_Side" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Shell_Side.stl" />
+    <mesh name="Shell_Side_Shell_Side" file="meshes/mini_pupper_description/meshes/mini_pupper_2/Shell_Side.stl" />
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300" />
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2" />
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072" />
+  </asset>
+
+  <actuator>
+    <position name="base_lf1" joint="base_lf1" class="actuator" />
+    <position name="lf1_lf2" joint="lf1_lf2" class="actuator" />
+    <position name="lf2_lf3" joint="lf2_lf3" class="actuator" />
+    <position name="base_rf1" joint="base_rf1" class="actuator" />
+    <position name="rf1_rf2" joint="rf1_rf2" class="actuator" />
+    <position name="rf2_rf3" joint="rf2_rf3" class="actuator" />
+    <position name="base_rb1" joint="base_rb1" class="actuator" />
+    <position name="rb1_rb2" joint="rb1_rb2" class="actuator" />
+    <position name="rb2_rb3" joint="rb2_rb3" class="actuator" />
+    <position name="base_lb1" joint="base_lb1" class="actuator" />
+    <position name="lb1_lb2" joint="lb1_lb2" class="actuator" />
+    <position name="lb2_lb3" joint="lb2_lb3" class="actuator" />
+  </actuator>
+
+  <!-- Resting standing pose. In the viewer, load it from the Simulation
+       panel or press the key-load button; test.py applies it on startup. -->
+  <keyframe>
+    <key name="stand"
+         qpos="0 0 0.1002  1 0 0 0   0 0.7 -1.2   0 0.7 -1.2   0 0.7 -1.2   0 0.7 -1.2"
+         ctrl="0 0.7 -1.2  0 0.7 -1.2  0 0.7 -1.2  0 0.7 -1.2" />
+  </keyframe>
+
+  <visual>
+    <rgba haze="0.15 0.25 0.35 1" />
+  </visual>
+</mujoco>

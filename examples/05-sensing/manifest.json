@@ -1,0 +1,8 @@
+{
+  "slug": "sensing",
+  "title": "05 \u2014 Sensing: the IMU and joint feedback",
+  "skill_type": "WASM",
+  "version": "1.0.0",
+  "abi": 4,
+  "readme": "Reads the IMU and the servos, and moves because of what it read: stays level when tilted, yields when a leg is pushed."
+}

@@ -1,0 +1,79 @@
+# Everything that can go stale, checked on every push.
+#
+# The point of this file is one specific class of bug. This repo previously
+# carried four hand-maintained copies of the same header; two had drifted and
+# one still described ABI v1, so a skill built against it would load and then
+# trap with no explanation. It also cited `examples/walk-with-gains` in the docs
+# while that example sat in a folder named `_to_delete/`.
+#
+# Neither is a discipline failure. Both are things only a machine reliably
+# notices.
+name: check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # tools/gen_abi.py reads the firmware's symbol table from ../mangdang.
+          # Without it the ABI check is skipped rather than failed, so this job
+          # is still useful in an SDK-only checkout.
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install clang with a wasm32 target
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clang lld
+          clang --version
+          llc --version | grep -i wasm32
+
+      - name: Install mpx-cli
+        run: pip install -e cli
+
+      - name: Everything
+        run: python tools/check.py
+
+      - name: Scaffold and build a fresh skill
+        # The scaffold is the first code every maker sees. If it does not
+        # compile, nothing else here matters.
+        env:
+          MPX_SDK_INCLUDE: ${{ github.workspace }}/sdk/include
+        run: |
+          for lang in c ts wat; do
+            mpx-cli init "ci_$lang" --lang "$lang" --dir "/tmp/ci_$lang"
+          done
+          clang --target=wasm32 -nostdlib -O2 -Wall -Wextra -Wconversion \
+                -Wno-sign-conversion -Wl,--no-entry -Wl,--export=on_start \
+                -Wl,--export-if-defined=on_stop -Wl,--import-undefined \
+                -I sdk/include -o /tmp/ci_c.wasm /tmp/ci_c/src/ci_c.c
+          ls -l /tmp/ci_c.wasm
+
+      - name: Compile a v2 skill through the compatibility shim
+        # mpx_compat.h exists so an existing skill keeps building. That promise
+        # is worth exactly as much as the test behind it.
+        run: |
+          cat > /tmp/legacy.c <<'EOF'
+          #include "mpx_compat.h"
+          MPX_EXPORT void on_start(void) {
+              MPX_LOG("legacy");
+              robot_stand();
+              robot_gait_enum(GAIT_ADVANCE);
+              robot_delay_ms(1000);
+              robot_set_servo_deg(SERVO_FR_KNEE, -12.0f);
+              robot_flush();
+              robot_gait_enum(GAIT_INIT);
+          }
+          EOF
+          clang --target=wasm32 -nostdlib -O2 -Wall -Wextra \
+                -Wl,--no-entry -Wl,--export=on_start -Wl,--import-undefined \
+                -I sdk/include -o /tmp/legacy.wasm /tmp/legacy.c

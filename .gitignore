@@ -37,3 +37,7 @@ node_modules/
 *~
 .DS_Store
 Thumbs.db
+
+# quarantined during the v3 restructure — review, then delete
+_to_delete/
+build/_check/

@@ -1,0 +1,60 @@
+/* {name} — a movement for the MPX-Dog.
+ *
+ *     mpx-cli deploy          build, upload, run
+ *     mpx-cli logs -f         watch what it says
+ *
+ * The whole SDK is in one header. Everything is `static inline`, so including
+ * all of it costs nothing — only what you call ends up in the module.
+ */
+#include "mpx.h"
+
+/* Your skill starts here. The robot calls this once. */
+MPX_EXPORT void on_start(void)
+{{
+    /* Catches the most confusing failure in this system: a module built
+     * against different firmware, which otherwise shows up as an unexplained
+     * trap on the first host call. */
+    MPX_REQUIRE_ABI();
+
+    /* Parameters come from the run, so you can change these without a rebuild:
+     *     mpx-cli run --param reach=25 --param repeats=2
+     * Declare them in manifest.json and the robot's web UI gives you a slider. */
+    const float reach   = mpx_paramf("reach", 20.0f);
+    const int   repeats = mpx_parami("repeats", 1);
+
+    MPX_LOG("{name} starting");
+    mpx_stand();
+
+    /* A movement is a few key moments and how to travel between them.
+     * Everything in between is interpolated and sent at a steady frame rate.
+     *
+     * The `ease` on a key says how you ARRIVE at it. Linear everywhere reads
+     * as mechanical; easing the ends is most of what makes motion look
+     * deliberate rather than commanded. */
+    mpx_stance_key_t bow[] = {{
+        {{    0, mpx_stance_stand(),                 MPX_EASE_LINEAR }},
+        {{  700, mpx_stance_front(reach, -55.0f),    MPX_EASE_INOUT  }},
+        {{ 1300, mpx_stance_front(reach, -55.0f),    MPX_EASE_LINEAR }},
+        {{ 2000, mpx_stance_stand(),                 MPX_EASE_OUT    }},
+    }};
+
+    if (mpx_stance_play(bow, 4, mpx_play(50, repeats)) != MPX_OK) {{
+        MPX_LOG("stopped early");
+        return;
+    }}
+
+    MPX_LOG("{name} done");
+}}
+
+/* Optional. Called when your skill ends, so you can leave the robot somewhere
+ * sensible. reason is MPX_STOP_DONE or MPX_STOP_TRAPPED.
+ *
+ * It does NOT run if the 60-second watchdog killed you — by then the module
+ * has already been torn down. If your skill can run long, park before you hit
+ * the limit rather than relying on this. */
+MPX_EXPORT void on_stop(int reason)
+{{
+    mpx_stop();          /* stop driving, if we were */
+    mpx_stand();         /* leave it standing        */
+    mpx_log_i("{name} stopped, reason", reason);
+}}

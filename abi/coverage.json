@@ -1,0 +1,455 @@
+{
+  "_note": "Firmware capability -> SDK call. tools/gen_coverage.py reads the firmware's public headers and fails if any function here is missing, or if the firmware grows one that is not listed. That is the mechanism behind the claim 'everything the robot can do, a skill can do': it is checked, not promised.",
+  "_status": {
+    "exposed": "Reachable from a skill.",
+    "internal": "Firmware plumbing with no meaning inside a skill (boot, the sandbox's own bookkeeping).",
+    "withheld": "Deliberately not exposed. The reason is in `why` and belongs in the docs, not in someone's head."
+  },
+  "sources": [
+    "robot/robot.h"
+  ],
+  "functions": {
+    "init": {
+      "status": "internal",
+      "why": "Boot. Runs before any skill exists."
+    },
+    "imu_init": {
+      "status": "internal",
+      "why": "Boot."
+    },
+    "servo_owned_by_skill": {
+      "status": "internal",
+      "why": "The sandbox's own bookkeeping."
+    },
+    "release_skill_bus_lock": {
+      "status": "internal",
+      "why": "The sandbox force-releases your lock when your skill ends. You get this for free."
+    },
+    "send_gait_cmd": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_gait",
+        "mpx_gait_for",
+        "mpx_gait_once",
+        "mpx_gait_play"
+      ],
+      "abi": [
+        "robot_gait"
+      ],
+      "area": "gaits"
+    },
+    "current_gait_cmd": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_gait_current"
+      ],
+      "abi": [
+        "robot_get_mode"
+      ],
+      "area": "gaits"
+    },
+    "joy_input": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_drive_at",
+        "mpx_drive_for",
+        "mpx_drive_mm_s",
+        "mpx_stop"
+      ],
+      "abi": [
+        "mpx_drive",
+        "mpx_drive_stop"
+      ],
+      "area": "driving"
+    },
+    "set_body_attitude": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_body",
+        "mpx_body_to",
+        "mpx_body_level",
+        "mpx_pitch"
+      ],
+      "abi": [
+        "robot_set_body_pose"
+      ],
+      "area": "body"
+    },
+    "set_attitude_speed": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_body_speed"
+      ],
+      "abi": [
+        "robot_set_attitude_speed"
+      ],
+      "area": "body"
+    },
+    "set_attitude_speed_xyz": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_body_speed_xyz"
+      ],
+      "abi": [
+        "robot_set_attitude_speed_xyz"
+      ],
+      "area": "body"
+    },
+    "get_config": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_gait_config",
+        "mpx_walk_speed"
+      ],
+      "abi": [
+        "robot_get_period",
+        "robot_get_height",
+        "robot_get_up_height",
+        "robot_get_stride",
+        "robot_get_tilt",
+        "mpx_get_walk_speed"
+      ],
+      "area": "gaits"
+    },
+    "set_config": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_gait_config_set",
+        "mpx_walk_speed_set"
+      ],
+      "abi": [
+        "robot_set_config",
+        "mpx_set_walk_speed"
+      ],
+      "area": "gaits"
+    },
+    "front_right_ik": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_foot_to",
+        "mpx_feet_to",
+        "mpx_stance_set"
+      ],
+      "abi": [
+        "mpx_foot",
+        "robot_ik_fr"
+      ],
+      "area": "feet"
+    },
+    "front_left_ik": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_foot_to",
+        "mpx_feet_to",
+        "mpx_stance_set"
+      ],
+      "abi": [
+        "mpx_foot",
+        "robot_ik_fl"
+      ],
+      "area": "feet"
+    },
+    "rear_right_ik": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_foot_to",
+        "mpx_feet_to",
+        "mpx_stance_set"
+      ],
+      "abi": [
+        "mpx_foot",
+        "robot_ik_rr"
+      ],
+      "area": "feet"
+    },
+    "rear_left_ik": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_foot_to",
+        "mpx_feet_to",
+        "mpx_stance_set"
+      ],
+      "abi": [
+        "mpx_foot",
+        "robot_ik_rl"
+      ],
+      "area": "feet"
+    },
+    "set_servo_angle": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_joint_to",
+        "mpx_pose_set"
+      ],
+      "abi": [
+        "robot_set_servo_angle"
+      ],
+      "area": "joints"
+    },
+    "set_servo_speed": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_joint_speed"
+      ],
+      "abi": [
+        "robot_set_servo_speed"
+      ],
+      "area": "joints"
+    },
+    "set_all_servo_speed": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_joints_speed"
+      ],
+      "abi": [
+        "mpx_set_all_servo_speed"
+      ],
+      "area": "joints"
+    },
+    "flush": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_frame_send",
+        "mpx_pose_apply",
+        "mpx_stance_apply"
+      ],
+      "abi": [
+        "robot_flush"
+      ],
+      "area": "joints"
+    },
+    "read_angle_cdeg": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_joint_at"
+      ],
+      "abi": [
+        "robot_read_angle_cdeg"
+      ],
+      "area": "sensing"
+    },
+    "read_position": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_joint_raw"
+      ],
+      "abi": [
+        "robot_read_position"
+      ],
+      "area": "sensing",
+      "note": "Raw 0-1023 in the absolute frame. mpx_joint_at() is what you want for a control loop."
+    },
+    "read_speed": {
+      "status": "exposed",
+      "abi": [
+        "robot_read_speed"
+      ],
+      "area": "sensing"
+    },
+    "read_load": {
+      "status": "exposed",
+      "abi": [
+        "robot_read_load"
+      ],
+      "area": "sensing"
+    },
+    "read_voltage": {
+      "status": "exposed",
+      "abi": [
+        "robot_read_voltage"
+      ],
+      "area": "sensing"
+    },
+    "read_temperature": {
+      "status": "exposed",
+      "abi": [
+        "robot_read_temperature"
+      ],
+      "area": "sensing"
+    },
+    "read_temperature_c": {
+      "status": "exposed",
+      "abi": [
+        "mpx_read_temperature_c"
+      ],
+      "area": "sensing"
+    },
+    "read_moving": {
+      "status": "exposed",
+      "abi": [
+        "robot_read_moving"
+      ],
+      "area": "sensing"
+    },
+    "read_current": {
+      "status": "exposed",
+      "abi": [
+        "robot_read_current"
+      ],
+      "area": "sensing"
+    },
+    "ping_servo": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_joint_ping"
+      ],
+      "abi": [
+        "robot_ping_servo"
+      ],
+      "area": "sensing"
+    },
+    "imu_read": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_imu",
+        "mpx_imu_tilt"
+      ],
+      "abi": [
+        "robot_imu_read"
+      ],
+      "area": "sensing"
+    },
+    "imu_print": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_imu_log"
+      ],
+      "abi": [
+        "robot_imu_print"
+      ],
+      "area": "sensing"
+    },
+    "get_offset": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_offset"
+      ],
+      "abi": [
+        "robot_get_offset"
+      ],
+      "area": "calibration"
+    },
+    "set_offset": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_offset_set"
+      ],
+      "abi": [
+        "robot_set_offset"
+      ],
+      "area": "calibration"
+    },
+    "reset_offsets": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_offsets_reset"
+      ],
+      "abi": [
+        "mpx_reset_offsets"
+      ],
+      "area": "calibration"
+    },
+    "servo_lock": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_bus_take"
+      ],
+      "abi": [
+        "servo_lock"
+      ],
+      "area": "bus"
+    },
+    "servo_unlock": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_bus_release"
+      ],
+      "abi": [
+        "servo_unlock"
+      ],
+      "area": "bus"
+    },
+    "servo_locked": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_bus_held"
+      ],
+      "abi": [
+        "servo_is_locked"
+      ],
+      "area": "bus"
+    },
+    "set_studio_mode": {
+      "status": "withheld",
+      "why": "Servo Studio is the human-in-the-loop calibration tool. A skill silently putting the robot into Studio mode would take the bus away from a person who is watching a joint move. Use the robot's web UI."
+    },
+    "studio_mode": {
+      "status": "withheld",
+      "why": "Paired with set_studio_mode. A skill that needs to know whether it may touch the bus should call mpx_bus_take() and read the return code."
+    },
+    "set_overlay": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_overlay",
+        "mpx_overlay_leg",
+        "mpx_overlay_stance"
+      ],
+      "abi": [
+        "mpx_overlay"
+      ],
+      "area": "overlay"
+    },
+    "get_overlay": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_overlay_at"
+      ],
+      "abi": [
+        "mpx_overlay_get"
+      ],
+      "area": "overlay"
+    },
+    "clear_overlay": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_overlay_clear"
+      ],
+      "abi": [
+        "mpx_overlay_clear"
+      ],
+      "area": "overlay",
+      "note": "Also called automatically when a skill ends, however it ends."
+    },
+    "gait_from_name": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_gait"
+      ],
+      "abi": [
+        "robot_gait"
+      ],
+      "area": "gaits",
+      "note": "The one name table. A skill sends a name; this resolves it, including names other skills provide."
+    },
+    "gait_to_name": {
+      "status": "internal",
+      "why": "Logging and HTTP responses. A skill already holds the enum it sent."
+    },
+    "gait_name_count": {
+      "status": "exposed",
+      "sdk": [
+        "MPX_GAITS",
+        "MPX_GAIT_COUNT"
+      ],
+      "area": "gaits",
+      "note": "The SDK ships the same catalogue as a generated table, so a skill needs no call to enumerate."
+    },
+    "gait_name_at": {
+      "status": "exposed",
+      "sdk": [
+        "mpx_gait_name"
+      ],
+      "area": "gaits"
+    }
+  }
+}

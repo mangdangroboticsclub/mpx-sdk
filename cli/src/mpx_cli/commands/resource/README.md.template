@@ -1,0 +1,36 @@
+# {name}
+
+A movement for the MPX-Dog.
+
+```bash
+mpx-cli deploy         # build, upload and run — the usual loop
+mpx-cli logs -f        # what the robot is saying
+```
+
+## Editing it
+
+`src/{name}.{ext}` is the whole skill. `on_start()` runs once; the optional
+`on_stop()` runs when it ends, so you can leave the robot somewhere sensible.
+
+## Parameters
+
+`manifest.json` declares the knobs. Change one without rebuilding:
+
+```bash
+mpx-cli run --param reach=25 --param repeats=2
+```
+
+The robot's web UI reads the same declarations and renders a control for each.
+
+## Where things are
+
+There is no `include/` here on purpose. The SDK headers live in exactly one
+place — `sdk/include/` in the SDK checkout — and `mpx-cli` points the compiler
+at them. Vendoring a copy per project is how you end up with a header that
+quietly describes a different ABI than the robot is running.
+
+## Next
+
+- `docs/start/03-first-movement.md` — how a movement is put together
+- `docs/guide/how-motion-works.md` — the control layers, and who owns a joint
+- `mpx-cli gaits` — the built-in movements you can call by name

@@ -1,64 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "============================================="
-echo " MPX-Dog Skill Dev Kit — Post-Create Setup"
-echo "============================================="
+echo "MPX SDK — setting up"
+echo
 
-# ── Install mpx-cli (from workspace source) ──────────────────
-CLI_DIR="${PWD}/mpx-cli"
-
+# ── Install mpx-cli from source ───────────────────────────────
+CLI_DIR="${PWD}/cli"
 if [[ -d "${CLI_DIR}" ]]; then
-    echo ""
-    echo "📦 Installing mpx-cli from ${CLI_DIR}..."
     pip install -e "${CLI_DIR}" --quiet
-    echo "   ✅ mpx-cli installed"
+    echo "  ok    mpx-cli installed (editable, from ./cli)"
 else
-    echo ""
-    echo "⚠️  mpx-cli source not found at ${CLI_DIR}"
-    echo "   You can install it later with: pip install -e ${CLI_DIR}"
+    echo "  !     ./cli not found — run this from the SDK root"
 fi
 
-# ── Verify toolchains ────────────────────────────────────────
-echo ""
-echo "🔧 Verifying WASM toolchains..."
+# ── Point every build at the one copy of the headers ──────────
+# mpx-cli finds sdk/include by walking up from the source anyway; setting it
+# explicitly means a build from outside the repo works too, and makes the
+# resolution visible instead of magic.
+if [[ -d "${PWD}/sdk/include" ]]; then
+    echo "export MPX_SDK_INCLUDE=${PWD}/sdk/include" >> "${HOME}/.bashrc"
+    export MPX_SDK_INCLUDE="${PWD}/sdk/include"
+    echo "  ok    MPX_SDK_INCLUDE=${MPX_SDK_INCLUDE}"
+fi
+
+echo
 if command -v mpx-cli &> /dev/null; then
-    mpx-cli build --show-toolchains
-else
-    # Manual verification
-    for tool in /opt/wasi-sdk/bin/clang /opt/wabt/bin/wat2wasm asc; do
-        if command -v "${tool}" &> /dev/null; then
-            echo "   ✅ ${tool} found"
-        else
-            echo "   ⚠️  ${tool} not found"
-        fi
-    done
+    mpx-cli doctor || true
 fi
 
-# ── Summary ──────────────────────────────────────────────────
-echo ""
-echo "============================================="
-echo " ✅ Setup complete!"
-echo ""
-echo " Quick start:"
-echo "   1. Check toolchain status:"
-echo "      mpx-cli build --show-toolchains"
-echo ""
-echo "   2. Build the provided examples:"
-echo "      mpx-cli build examples/hello-wasm/src/test_skill.c --validate"
-echo "      mpx-cli build examples/robot-demo/src/robot_skill.c --validate"
-echo ""
-echo "   3. Create a new skill:"
-echo "      mpx-cli init my-skill --lang c"
-echo ""
-echo "   4. Build the new skill:"
-echo "      mpx-cli build my-skill/src/my-skill.c -o build/my-skill.wasm --validate"
-echo ""
-echo "   5. Upload & run (on robot Wi-Fi):"
-echo "      mpx-cli upload -i 192.168.2.1 build/my-skill.wasm"
-echo "      mpx-cli run -i 192.168.2.1 my-skill.wasm"
-echo ""
-echo "   Override robot IP via -i (or set \$MPX_HOST env var):"
-echo "      mpx-cli -i 192.168.2.1 run my-skill.wasm"
-echo "      export MPX_HOST=192.168.2.1"
-echo "============================================="
+cat <<'EOT'
+
+Next:
+
+  1.  Join the robot's Wi-Fi (MPX-Dog), then:
+        echo "MPX_HOST=192.168.2.1" > .env
+
+  2.  Run something:
+        mpx-cli deploy examples/01-hello
+        mpx-cli logs -f
+
+  3.  Make your own:
+        mpx-cli init my_move && cd my_move && mpx-cli deploy
+
+  Read docs/start/ first, then docs/guide/how-motion-works.md.
+EOT

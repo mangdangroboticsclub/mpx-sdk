@@ -1,0 +1,31 @@
+{
+  "slug": "together",
+  "title": "06 \u2014 All four layers, and a behaviour",
+  "skill_type": "WASM",
+  "version": "1.0.0",
+  "abi": 4,
+  "readme": "Walks in (L1), bows (L2), waves a paw (L3), goes soft to be patted (L4), walks off \u2014 then stays as a behaviour keeping itself level.",
+  "provides_gait": "greet",
+  "behaviour": true,
+  "on": [
+    "imu.lifted"
+  ],
+  "params": [
+    {
+      "name": "gain",
+      "type": "float",
+      "default": 0.45,
+      "min": 0.0,
+      "max": 1.5,
+      "label": "Levelling gain"
+    },
+    {
+      "name": "speed",
+      "type": "int",
+      "default": 50,
+      "min": 10,
+      "max": 200,
+      "label": "Walk speed (mm/s)"
+    }
+  ]
+}

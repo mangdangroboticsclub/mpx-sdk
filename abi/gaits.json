@@ -1,0 +1,286 @@
+{
+  "_note": "Human-authored metadata for the built-in gaits. The enum values and wire names are NOT here -- those come from the firmware and are read by tools/gen_gaits.py. This file only carries what a person has to write: the SDK's name for each gait, what it does, whether it holds or returns, and how long it naturally takes.",
+  "kinds": {
+    "holds": "Stays in its final pose until you change it.",
+    "returns": "Performs once and comes back to standing on its own.",
+    "cycles": "Repeats until stopped."
+  },
+  "gaits": {
+    "none": {
+      "enum": "MPX_GAIT_NONE",
+      "description": "Stop the gait generator; hold the current pose.",
+      "kind": "holds",
+      "typical_ms": 0
+    },
+    "init": {
+      "enum": "MPX_GAIT_STAND",
+      "description": "Return to the neutral standing pose.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "step": {
+      "enum": "MPX_GAIT_STEP",
+      "description": "March on the spot.",
+      "kind": "cycles",
+      "typical_ms": 1500
+    },
+    "roll": {
+      "enum": "MPX_GAIT_ROLL",
+      "description": "Roll the body side to side.",
+      "kind": "cycles",
+      "typical_ms": 1500
+    },
+    "pitch": {
+      "enum": "MPX_GAIT_PITCH",
+      "description": "Pitch the body nose-up and nose-down.",
+      "kind": "cycles",
+      "typical_ms": 1500
+    },
+    "stretch": {
+      "enum": "MPX_GAIT_STRETCH",
+      "description": "Stretch the legs out, like waking up.",
+      "kind": "returns",
+      "typical_ms": 2000
+    },
+    "advance": {
+      "enum": "MPX_GAIT_FORWARD",
+      "description": "Walk forward.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "back": {
+      "enum": "MPX_GAIT_BACK",
+      "description": "Walk backward.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "left": {
+      "enum": "MPX_GAIT_STRAFE_LEFT",
+      "description": "Sidestep left without turning.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "right": {
+      "enum": "MPX_GAIT_STRAFE_RIGHT",
+      "description": "Sidestep right without turning.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "turnL": {
+      "enum": "MPX_GAIT_TURN_LEFT",
+      "description": "Spin left on the spot.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "turnR": {
+      "enum": "MPX_GAIT_TURN_RIGHT",
+      "description": "Spin right on the spot.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "twerk": {
+      "enum": "MPX_GAIT_TWERK",
+      "description": "Rear-end shimmy. Crowd-pleaser.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "jump": {
+      "enum": "MPX_GAIT_JUMP",
+      "description": "Jump straight up.",
+      "kind": "returns",
+      "typical_ms": 2000
+    },
+    "jumpfwd": {
+      "enum": "MPX_GAIT_JUMP_FORWARD",
+      "description": "Jump forward.",
+      "kind": "returns",
+      "typical_ms": 2000
+    },
+    "testspeed": {
+      "enum": "MPX_GAIT_TEST_SPEED",
+      "description": "Diagnostic speed sweep. Not a display move.",
+      "kind": "cycles",
+      "typical_ms": 3000
+    },
+    "lookup": {
+      "enum": "MPX_GAIT_LOOK_UP",
+      "description": "Tilt the body to look up.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "lookdown": {
+      "enum": "MPX_GAIT_LOOK_DOWN",
+      "description": "Tilt the body to look down.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "lookleft": {
+      "enum": "MPX_GAIT_LOOK_LEFT",
+      "description": "Turn the body to look left.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "lookright": {
+      "enum": "MPX_GAIT_LOOK_RIGHT",
+      "description": "Turn the body to look right.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "lookul": {
+      "enum": "MPX_GAIT_LOOK_UP_LEFT",
+      "description": "Look up and to the left.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "lookur": {
+      "enum": "MPX_GAIT_LOOK_UP_RIGHT",
+      "description": "Look up and to the right.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "lookll": {
+      "enum": "MPX_GAIT_LOOK_DOWN_LEFT",
+      "description": "Look down and to the left.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "looklr": {
+      "enum": "MPX_GAIT_LOOK_DOWN_RIGHT",
+      "description": "Look down and to the right.",
+      "kind": "holds",
+      "typical_ms": 800
+    },
+    "flegL": {
+      "enum": "MPX_GAIT_LIFT_FRONT_LEFT",
+      "description": "Raise the front-left paw.",
+      "kind": "holds",
+      "typical_ms": 1200
+    },
+    "flegR": {
+      "enum": "MPX_GAIT_LIFT_FRONT_RIGHT",
+      "description": "Raise the front-right paw.",
+      "kind": "holds",
+      "typical_ms": 1200
+    },
+    "blegL": {
+      "enum": "MPX_GAIT_LIFT_REAR_LEFT",
+      "description": "Raise the rear-left leg.",
+      "kind": "holds",
+      "typical_ms": 1200
+    },
+    "blegR": {
+      "enum": "MPX_GAIT_LIFT_REAR_RIGHT",
+      "description": "Raise the rear-right leg.",
+      "kind": "holds",
+      "typical_ms": 1200
+    },
+    "heightup": {
+      "enum": "MPX_GAIT_HEIGHT_UP",
+      "description": "Stand taller.",
+      "kind": "holds",
+      "typical_ms": 600
+    },
+    "heightdown": {
+      "enum": "MPX_GAIT_HEIGHT_DOWN",
+      "description": "Crouch lower.",
+      "kind": "holds",
+      "typical_ms": 600
+    },
+    "balance": {
+      "enum": "MPX_GAIT_BALANCE",
+      "description": "Hold level using the IMU.",
+      "kind": "cycles",
+      "typical_ms": 0
+    },
+    "bowback": {
+      "enum": "MPX_GAIT_BOW",
+      "description": "Bow: front down, rear up.",
+      "kind": "holds",
+      "typical_ms": 1200
+    },
+    "bodycycle": {
+      "enum": "MPX_GAIT_BODY_CYCLE",
+      "description": "Circle the body over planted feet.",
+      "kind": "cycles",
+      "typical_ms": 2500
+    },
+    "headellipse": {
+      "enum": "MPX_GAIT_HEAD_ELLIPSE",
+      "description": "Trace an ellipse with the front of the body.",
+      "kind": "cycles",
+      "typical_ms": 2500
+    },
+    "moveLF": {
+      "enum": "MPX_GAIT_MOVE_FL",
+      "description": "Sweep the front-left leg through an arc.",
+      "kind": "returns",
+      "typical_ms": 1500
+    },
+    "moveRF": {
+      "enum": "MPX_GAIT_MOVE_FR",
+      "description": "Sweep the front-right leg through an arc.",
+      "kind": "returns",
+      "typical_ms": 1500
+    },
+    "moveLB": {
+      "enum": "MPX_GAIT_MOVE_RL",
+      "description": "Sweep the rear-left leg through an arc.",
+      "kind": "returns",
+      "typical_ms": 1500
+    },
+    "moveRB": {
+      "enum": "MPX_GAIT_MOVE_RR",
+      "description": "Sweep the rear-right leg through an arc.",
+      "kind": "returns",
+      "typical_ms": 1500
+    },
+    "frontkick": {
+      "enum": "MPX_GAIT_FRONT_KICK",
+      "description": "Kick forward with a front leg, then recover.",
+      "kind": "returns",
+      "typical_ms": 2000
+    },
+    "wiggle": {
+      "enum": "MPX_GAIT_WIGGLE",
+      "description": "Rear up and wiggle.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "buttshrug": {
+      "enum": "MPX_GAIT_BUTT_SHRUG",
+      "description": "Front up, rear shrug.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "wiggleL": {
+      "enum": "MPX_GAIT_WIGGLE_LEFT",
+      "description": "Wiggle, leaning left.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "wiggleR": {
+      "enum": "MPX_GAIT_WIGGLE_RIGHT",
+      "description": "Wiggle, leaning right.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "buttshrugL": {
+      "enum": "MPX_GAIT_BUTT_SHRUG_LEFT",
+      "description": "Butt shrug, leaning left.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "buttshrugR": {
+      "enum": "MPX_GAIT_BUTT_SHRUG_RIGHT",
+      "description": "Butt shrug, leaning right.",
+      "kind": "cycles",
+      "typical_ms": 2000
+    },
+    "stanford": {
+      "enum": "MPX_GAIT_TROT",
+      "description": "Stanford trot - the smoothest walk. Speed is set by mpx_walk_speed_set().",
+      "kind": "cycles",
+      "typical_ms": 0
+    }
+  }
+}

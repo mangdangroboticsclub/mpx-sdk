@@ -1,0 +1,49 @@
+;; {name} — a movement for the MPX-Dog, in WebAssembly text.
+;;
+;;     mpx-cli deploy
+;;     mpx-cli logs -f
+;;
+;; WAT gets the raw host functions and nothing else: no friendly wrappers, no
+;; maths, no timeline. Angles are centidegrees relative to centre and nothing
+;; moves until robot_flush. Use it to see exactly what a skill costs, or when
+;; you want no abstraction at all. For actually authoring movement, C is the
+;; better tool -- mpx-cli init {name} --lang c.
+;;
+;; Every import is listed in include/host-functions.md, generated from the
+;; firmware's own table. `mpx-cli sync` refreshes it.
+
+(module
+  (import "env" "print"          (func $print (param i32) (param i32) (result i32)))
+  (import "env" "mpx_abi_version"(func $abi (result i32)))
+  (import "env" "robot_gait"     (func $gait (param i32) (result i32)))
+  (import "env" "robot_delay_ms" (func $delay (param i32) (result i32)))
+
+  (memory (export "memory") 1)
+
+  ;; String constants, with their offsets and lengths written down because
+  ;; nothing here will work them out for you.
+  (data (i32.const 0)  "{name} running\n")   ;; offset 0,  len 15 + name
+  (data (i32.const 64) "init")                ;; offset 64, len 4
+  (data (i32.const 80) "advance")             ;; offset 80, len 7
+  (data (i32.const 96) "none")                ;; offset 96, len 4
+
+  (func (export "on_start")
+    ;; Bail out if the firmware speaks a different ABI.
+    (if (i32.ne (call $abi) (i32.const 3))
+      (then return))
+
+    (drop (call $gait  (i32.const 64)))       ;; stand
+    (drop (call $delay (i32.const 800)))
+
+    (drop (call $gait  (i32.const 80)))       ;; walk forward
+    (drop (call $delay (i32.const 2000)))
+
+    (drop (call $gait  (i32.const 64)))       ;; stand again
+    (drop (call $delay (i32.const 800)))
+  )
+
+  ;; Optional: runs when the skill ends, so you can park the robot.
+  (func (export "on_stop") (param $reason i32)
+    (drop (call $gait (i32.const 64)))
+  )
+)
