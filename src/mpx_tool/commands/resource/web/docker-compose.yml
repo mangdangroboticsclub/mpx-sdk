@@ -1,0 +1,44 @@
+# Web runtime for `mpx web up` / `mpx web down`.
+# AWA worker + GCS emulator. Images are auto-pulled from Docker Hub
+# (design doc §6.4 / §6.5). Values in ${...} come from the environment,
+# with sensible defaults.
+
+services:
+  gcs:
+    image: ${MPX_GCS_EMULATOR_IMAGE:-fsouza/fake-gcs-server:latest}
+    container_name: mpx-gcs-emulator
+    command:
+      - "-scheme"
+      - "http"
+      - "-port"
+      - "4443"
+      - "-public-host"
+      - "localhost:4443"
+    ports:
+      - "4443:4443"
+    volumes:
+      - mpx-gcs-data:/storage
+
+  awa-worker:
+    image: ${MPX_WEB_WORKER_IMAGE:-silverhusky/mpx-web-worker:0.1.0}
+    container_name: mpx-awa-worker
+    depends_on:
+      - gcs
+    environment:
+      PORT: "8080"
+      NODE_ENV: development
+      GCS_ENDPOINT: http://gcs:4443
+      GCS_BUCKET: ${MPX_GCS_BUCKET:-awa-skills-dev}
+      GCS_PROJECT_ID: openclaw-dev
+      CHROME_PATH: /usr/bin/chromium
+      PLAYWRIGHT_HEADLESS: "true"
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      PROXY_MODE: none
+      LOG_LEVEL: info
+    ports:
+      - "9808:8080"
+    cap_add:
+      - SYS_ADMIN
+
+volumes:
+  mpx-gcs-data:

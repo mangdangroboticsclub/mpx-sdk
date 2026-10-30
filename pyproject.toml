@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mpx"
+version = "0.2.0"
+description = "MPX developer CLI — scaffold, build, test and publish robot (WASM) and web (AWA) skills"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+keywords = ["mpx", "wasm", "awa", "robot", "cli"]
+
+[project.scripts]
+mpx = "mpx_tool.cli:main"
+mpx-cli = "mpx_tool.cli:main_legacy_cli"
+mpx-awa = "mpx_tool.cli:main_legacy_awa"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mpx_tool*"]
+
+[tool.setuptools.package-data]
+"mpx_tool.commands.resource.move" = ["*"]
+"mpx_tool.commands.resource.web" = ["*"]

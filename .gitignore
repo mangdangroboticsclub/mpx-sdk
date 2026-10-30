@@ -1,43 +1,60 @@
-# ── Python ────────────────────────────────────────────────────────
+# ── Python ──────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-*.egg-info/
-*.egg
-dist/
 build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+*.egg-link
 *.whl
+*.tar.gz
 MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
-# ── mpx-cli editable install ─────────────────────────────────────
-*.egg-link
+# ── Virtual environments ────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 
-# ── WASM build outputs ───────────────────────────────────────────
+# ── Packaging / publishing ──────────────────────────────────────
+wheelhouse/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ── WASM build outputs ──────────────────────────────────────────
 *.wasm
 examples/**/build/
 
-# ── Node / AssemblyScript ────────────────────────────────────────
+# ── Node / AssemblyScript ───────────────────────────────────────
 node_modules/
 
-# ── Environment ──────────────────────────────────────────────────
+# ── Local state / secrets ───────────────────────────────────────
 .env
+.env.*
 .env.local
 .env.*.local
+!.env.sample
 
-# ── IDE / Editor ─────────────────────────────────────────────────
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
-!.vscode/extensions.json
+# Local editor/PyPI test config files
+.pypirc
+twine/
+.token
+
+# ── Editor / IDE ────────────────────────────────────────────────
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
 .DS_Store
 Thumbs.db
-
-# quarantined during the v3 restructure — review, then delete
-_to_delete/
-build/_check/
